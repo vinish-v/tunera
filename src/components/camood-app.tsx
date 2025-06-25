@@ -20,6 +20,7 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
   const [songs, setSongs] = useState<Song[]>([]);
   const [isSuggestingSongs, setIsSuggestingSongs] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [language, setLanguage] = useState('English');
   const { toast } = useToast();
 
   const handleCapture = async (imageDataUri: string) => {
@@ -44,7 +45,7 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
       setMood(predictedMood);
 
       setLoadingMessage('Finding your perfect playlist...');
-      const { songs: suggestedSongs } = await suggestSongsForMood({ mood: predictedMood });
+      const { songs: suggestedSongs } = await suggestSongsForMood({ mood: predictedMood, language });
       
       if (!suggestedSongs || suggestedSongs.length === 0) {
         throw new Error("Song suggestion returned empty.");
@@ -65,12 +66,13 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
     }
   };
 
-  const handleRefreshSongs = async () => {
+  const handleRefreshSongs = async (newLanguage?: string) => {
     if (!mood) return;
 
     setIsSuggestingSongs(true);
     try {
-      const { songs: suggestedSongs } = await suggestSongsForMood({ mood });
+      const langToUse = newLanguage || language;
+      const { songs: suggestedSongs } = await suggestSongsForMood({ mood, language: langToUse });
 
       if (!suggestedSongs || suggestedSongs.length === 0) {
         throw new Error("Song suggestion returned empty.");
@@ -90,12 +92,17 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
     }
   };
 
+  const handleLanguageChange = (newLanguage: string) => {
+    setLanguage(newLanguage);
+    handleRefreshSongs(newLanguage);
+  }
 
   const handleReset = () => {
     setStep('intro');
     setMood('');
     setSongs([]);
     setLoadingMessage('');
+    setLanguage('English');
   };
 
   const renderStep = () => {
@@ -113,8 +120,10 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
           songs={songs} 
           onReset={handleReset} 
           isSpotifyConnected={isSpotifyConnected}
-          onRefresh={handleRefreshSongs}
+          onRefresh={() => handleRefreshSongs()}
           isRefreshing={isSuggestingSongs}
+          language={language}
+          onLanguageChange={handleLanguageChange}
         />;
       default:
         return <IntroScreen onStart={() => setStep('camera')} />;

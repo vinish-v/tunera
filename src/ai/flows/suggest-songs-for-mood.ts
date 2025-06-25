@@ -12,6 +12,7 @@ import {z} from 'genkit';
 
 const SuggestSongsForMoodInputSchema = z.object({
   mood: z.string().describe('The mood of the user.'),
+  language: z.string().optional().describe('The language for the song suggestions.'),
 });
 export type SuggestSongsForMoodInput = z.infer<typeof SuggestSongsForMoodInputSchema>;
 
@@ -40,6 +41,9 @@ const prompt = ai.definePrompt({
     prompt: `You are a music expert and world-class DJ specializing in creating playlists that perfectly match a given emotion. Your task is to suggest a few songs that embody the provided mood.
 
     The mood is: {{{mood}}}
+    {{#if language}}
+    Please suggest songs primarily in the following language: {{{language}}}.
+    {{/if}}
     
     Please provide a list of 3-5 songs that fit this specific mood. For each song, include the title and artist. Ensure the suggestions are highly relevant to the emotion. To ensure variety, provide a different set of songs each time you are asked for the same mood.`,
 });

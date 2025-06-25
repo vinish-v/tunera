@@ -5,7 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SongCard, SongCardSkeleton } from "@/components/song-card";
-import { RefreshCw, Sparkles } from 'lucide-react';
+import { RefreshCw, Sparkles, Languages } from 'lucide-react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 const SpotifyIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -22,7 +29,9 @@ const SpotifyIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 type Song = { title: string; artist: string };
 
-export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected, onRefresh, isRefreshing }: { mood: string; songs: Song[]; onReset: () => void; isSpotifyConnected: boolean; onRefresh: () => void; isRefreshing: boolean; }) => {
+const languages = ['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Dutch', 'Japanese', 'Korean', 'Mandarin', 'Hindi'];
+
+export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected, onRefresh, isRefreshing, language, onLanguageChange }: { mood: string; songs: Song[]; onReset: () => void; isSpotifyConnected: boolean; onRefresh: () => void; isRefreshing: boolean; language: string; onLanguageChange: (language: string) => void; }) => {
   return (
     <Card className="shadow-2xl animate-in fade-in zoom-in-95 duration-500 w-full">
       <CardHeader>
@@ -57,6 +66,19 @@ export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected, onRefr
         </div>
       </CardHeader>
       <CardContent>
+        <div className="flex items-center gap-2 mb-4 px-1">
+            <Languages className="w-5 h-5 text-muted-foreground" />
+            <Select onValueChange={onLanguageChange} defaultValue={language}>
+                <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a language" />
+                </SelectTrigger>
+                <SelectContent>
+                    {languages.map(lang => (
+                        <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
         <ScrollArea className="h-64 sm:h-72 pr-4">
             <div className="space-y-2">
               {isRefreshing ? (
