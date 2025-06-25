@@ -1,7 +1,8 @@
+
 "use client";
 
 import Image from 'next/image';
-import { Play, Music } from 'lucide-react';
+import { Music } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
@@ -16,9 +17,6 @@ export const SongCardSkeleton = () => (
             <div className="flex-grow space-y-2">
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
-            </div>
-             <div className="flex-shrink-0">
-                <Skeleton className="h-8 w-8 rounded-full" />
             </div>
         </CardContent>
     </Card>
@@ -105,11 +103,6 @@ export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyCo
             <p className="font-bold truncate" title={songTitle}>{songTitle}</p>
             <p className="text-sm text-muted-foreground truncate" title={artistName}>{artistName}</p>
           </div>
-          {trackUrl && (
-              <div className="flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors">
-                  <Play className="w-5 h-5 fill-current" />
-              </div>
-          )}
       </CardContent>
     </Card>
   );
