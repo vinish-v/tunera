@@ -2,11 +2,14 @@
 "use client";
 
 import Image from 'next/image';
-import { Music } from 'lucide-react';
+import { Music, Heart } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
 import { useToast } from "@/hooks/use-toast";
+import { useFavourites } from '@/hooks/use-favourites';
+import { Button } from './ui/button';
+import { cn } from '@/lib/utils';
 
 type Song = { title: string; artist: string };
 
@@ -22,12 +25,20 @@ export const SongCardSkeleton = () => (
     </Card>
 );
 
-export function SongCard({ song, streamingPlatform }: { song: Song; streamingPlatform: string; }) {
-  const [track, setTrack] = useState<SpotifyApi.SingleTrackResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export function SongCard({ song, streamingPlatform, initialTrack }: { song: Song; streamingPlatform: string; initialTrack?: SpotifyApi.SingleTrackResponse | null }) {
+  const [track, setTrack] = useState<SpotifyApi.SingleTrackResponse | null>(initialTrack || null);
+  const [isLoading, setIsLoading] = useState(!initialTrack);
   const { toast } = useToast();
+  const { addFavourite, removeFavourite, isFavourite, isLoaded } = useFavourites();
+
 
   useEffect(() => {
+    if (initialTrack) {
+        setTrack(initialTrack);
+        setIsLoading(false);
+        return;
+    }
+
     const fetchTrack = async () => {
       setIsLoading(true);
       try {
@@ -51,11 +62,24 @@ export function SongCard({ song, streamingPlatform }: { song: Song; streamingPla
     };
 
     fetchTrack();
-  }, [song]);
+  }, [song, initialTrack]);
 
   const songTitle = track?.name ?? song.title;
   const artistName = track?.artists.map(a => a.name).join(', ') ?? song.artist;
   const imageUrl = track?.album.images[0]?.url;
+
+  const isFav = track ? isFavourite(track.id) : false;
+
+  const handleFavouriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!track) return;
+
+    if (isFav) {
+        removeFavourite(track.id);
+    } else {
+        addFavourite(track);
+    }
+  };
 
   const handleClick = () => {
     const query = encodeURIComponent(`${song.title} ${song.artist}`);
@@ -108,6 +132,17 @@ export function SongCard({ song, streamingPlatform }: { song: Song; streamingPla
             <p className="font-bold truncate" title={songTitle}>{songTitle}</p>
             <p className="text-sm text-muted-foreground truncate" title={artistName}>{artistName}</p>
           </div>
+          {isLoaded && track && (
+            <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full h-9 w-9 shrink-0"
+                onClick={handleFavouriteClick}
+            >
+                <Heart className={cn("h-5 w-5", isFav ? "fill-red-500 text-red-500" : "text-muted-foreground")} />
+                <span className="sr-only">Favourite</span>
+            </Button>
+          )}
       </CardContent>
     </Card>
   );

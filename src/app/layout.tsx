@@ -1,8 +1,9 @@
+
 import type { Metadata, Viewport } from 'next';
 import { Toaster } from "@/components/ui/toaster"
 import './globals.css';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from '@/components/ui/sidebar';
-import { User, Info, Music } from 'lucide-react';
+import { User, Info, Music, Heart, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -39,6 +40,22 @@ export default function RootLayout({
                 </SidebarHeader>
                 <SidebarContent>
                     <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton tooltip="Home" asChild>
+                                <Link href="/">
+                                    <Sparkles />
+                                    <span>Home</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton tooltip="Favourites" asChild>
+                                <Link href="/favourites">
+                                    <Heart />
+                                    <span>Favourites</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
                         <SidebarMenuItem>
                             <SidebarMenuButton tooltip="Account" asChild>
                                 <Link href="/account">
