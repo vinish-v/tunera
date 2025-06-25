@@ -3,9 +3,7 @@
 import Image from 'next/image';
 import { Play, Music } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
-import type SpotifyWebApi from 'spotify-web-api-node';
 import { Skeleton } from './ui/skeleton';
 
 type Song = { title: string; artist: string };
@@ -50,24 +48,6 @@ export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyCo
   const imageUrl = track?.album.images[0]?.url;
   const trackUrl = track?.external_urls.spotify;
 
-  const PlayButtonContent = () => {
-    if (trackUrl) {
-      return <Play className="w-5 h-5 fill-current" />;
-    }
-    return <Music className="w-5 h-5" />;
-  };
-
-  const PlayButtonWrapper = ({ children }: { children: React.ReactNode }) => {
-    if (trackUrl) {
-      return (
-        <a href={trackUrl} target="_blank" rel="noopener noreferrer">
-          {children}
-        </a>
-      );
-    }
-    return <>{children}</>;
-  };
-
   if (isLoading && isSpotifyConnected) {
     return (
         <Card>
@@ -77,15 +57,16 @@ export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyCo
                     <Skeleton className="h-4 w-3/4" />
                     <Skeleton className="h-4 w-1/2" />
                 </div>
-                <Skeleton className="h-10 w-10 rounded-full" />
+                 <div className="flex-shrink-0">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                </div>
             </CardContent>
         </Card>
     );
   }
 
-  return (
-    <Card className="bg-background/50 hover:bg-accent/50 hover:shadow-md transition-all duration-300">
-      <CardContent className="p-3 flex items-center gap-4">
+  const cardInnerContent = (
+    <CardContent className="p-3 flex items-center gap-4">
         {imageUrl ? (
           <Image 
             src={imageUrl} 
@@ -103,12 +84,27 @@ export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyCo
           <p className="font-bold truncate" title={songTitle}>{songTitle}</p>
           <p className="text-sm text-muted-foreground truncate" title={artistName}>{artistName}</p>
         </div>
-        <PlayButtonWrapper>
-          <Button size="icon" variant="ghost" className="rounded-full flex-shrink-0" disabled={!trackUrl}>
-            <PlayButtonContent />
-          </Button>
-        </PlayButtonWrapper>
-      </CardContent>
+        {trackUrl && (
+            <div className="flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors">
+                <Play className="w-5 h-5 fill-current" />
+            </div>
+        )}
+    </CardContent>
+  );
+
+  const cardComponent = (
+    <Card className={`bg-background/50 group hover:bg-accent/50 hover:shadow-md transition-all duration-300 ${trackUrl ? 'cursor-pointer' : ''}`}>
+      {cardInnerContent}
     </Card>
   );
+  
+  if (trackUrl) {
+    return (
+      <a href={trackUrl} target="_blank" rel="noopener noreferrer" className="block">
+        {cardComponent}
+      </a>
+    );
+  }
+
+  return cardComponent;
 }
