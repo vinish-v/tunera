@@ -2,7 +2,7 @@
 "use client";
 
 import Image from 'next/image';
-import { Music, Heart, Share2, Download } from 'lucide-react';
+import { Music, Heart, Share2, Download, Loader2, Copy } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Skeleton } from './ui/skeleton';
@@ -79,7 +79,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
   }, [song.title, toast]);
 
   const handleShare = useCallback(async () => {
-    if (!moodCardRef.current) return;
+    if (!moodCardRef.current || !canShareNatively) return;
     setShareState('sharing');
     try {
         const blob = await toBlob(moodCardRef.current, { quality: 0.95, pixelRatio: 2 });
@@ -92,7 +92,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         await navigator.share({
             files: [file],
             title: 'My Camood Vibe',
-            text: 'Check out the vibe I just captured with Camood!',
+            text: `Feeling ${moodResult?.mood || 'great'}! Check out the vibe I just captured with Camood.`,
         });
 
     } catch (error) {
@@ -108,7 +108,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         setShareState('idle');
         setIsShareOpen(false);
     }
-  }, [song.title, toast]);
+  }, [song.title, toast, canShareNatively, moodResult?.mood]);
 
   useEffect(() => {
     if (initialTrack) {
@@ -221,14 +221,15 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
               <p className="font-bold truncate" title={songTitle}>{songTitle}</p>
               <p className="text-sm text-muted-foreground truncate" title={artistName}>{artistName}</p>
             </div>
-            {isLoaded && track && (
+            {isLoaded && (
               <div className="flex items-center shrink-0">
                   <Button
                       variant="ghost"
                       size="icon"
                       className="rounded-full h-9 w-9"
                       onClick={handleFavouriteClick}
-                      title="Add to Favourites"
+                      title={track ? (isFav ? 'Remove from Favourites' : 'Add to Favourites') : "Cannot favourite track (Spotify API unavailable)"}
+                      disabled={!track}
                   >
                       <Heart className={cn("h-5 w-5", isFav ? "fill-red-500 text-red-500" : "text-muted-foreground")} />
                       <span className="sr-only">Favourite</span>
@@ -255,7 +256,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
           <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Share Your Vibe</DialogTitle>
-              <DialogDescription>Here's a preview of your shareable mood card.</DialogDescription>
+              <DialogDescription>Share this mood card with your friends.</DialogDescription>
             </DialogHeader>
             <div className="py-4">
               <MoodCardShare
