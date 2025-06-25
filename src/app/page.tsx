@@ -1,7 +1,7 @@
 import CamoodApp from '@/components/camood-app';
 import { cookies } from 'next/headers';
 
-export default function Home() {
+export default async function Home() {
   const cookieStore = cookies();
   const isSpotifyConnected = cookieStore.has('spotify_access_token');
 
