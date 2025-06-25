@@ -37,11 +37,11 @@ const prompt = ai.definePrompt({
     name: 'suggestSongsPrompt',
     input: {schema: SuggestSongsForMoodInputSchema},
     output: {schema: SuggestSongsForMoodOutputSchema},
-    prompt: `You are a world-class DJ. Given a mood, suggest a few songs that fit that vibe.
+    prompt: `You are a music expert and world-class DJ specializing in creating playlists that perfectly match a given emotion. Your task is to suggest a few songs that embody the provided mood.
 
-    Mood: {{{mood}}}
+    The mood is: {{{mood}}}
     
-    Provide a list of 3-5 songs. For each song, include the title and artist.`,
+    Please provide a list of 3-5 songs that fit this specific mood. For each song, include the title and artist. Ensure the suggestions are highly relevant to the emotion.`,
 });
 
 const suggestSongsForMoodFlow = ai.defineFlow(
@@ -53,14 +53,7 @@ const suggestSongsForMoodFlow = ai.defineFlow(
   async (input) => {
     const {output} = await prompt(input);
     if (!output || output.songs.length === 0) {
-      // Fallback in case the model fails or returns an empty list
-      return {
-        songs: [
-          { title: "Don't Worry, Be Happy", artist: 'Bobby McFerrin' },
-          { title: 'Three Little Birds', artist: 'Bob Marley & The Wailers' },
-          { title: 'Here Comes The Sun', artist: 'The Beatles' },
-        ],
-      };
+      throw new Error(`Failed to generate song suggestions for mood: ${input.mood}`);
     }
     return output;
   }
