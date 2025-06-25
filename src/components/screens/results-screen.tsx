@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SongCard, SongCardSkeleton } from "@/components/song-card";
-import { RefreshCw, Sparkles, Languages } from 'lucide-react';
+import { RefreshCw, Sparkles, Languages, Play } from 'lucide-react';
+import { useState } from "react";
 import {
     Select,
     SelectContent,
@@ -30,8 +31,11 @@ const SpotifyIcon = (props: React.SVGProps<SVGSVGElement>) => (
 type Song = { title: string; artist: string };
 
 const languages = ['Arabic', 'Bengali', 'Dutch', 'English', 'French', 'German', 'Gujarati', 'Hindi', 'Indonesian', 'Italian', 'Japanese', 'Kannada', 'Korean', 'Malayalam', 'Mandarin', 'Marathi', 'Odia', 'Polish', 'Portuguese', 'Punjabi', 'Russian', 'Spanish', 'Tamil', 'Telugu', 'Thai', 'Turkish', 'Urdu', 'Vietnamese'];
+const platforms = ['Spotify', 'YouTube', 'YouTube Music', 'Amazon Music'];
 
 export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected, onRefresh, isRefreshing, language, onLanguageChange }: { mood: string; songs: Song[]; onReset: () => void; isSpotifyConnected: boolean; onRefresh: () => void; isRefreshing: boolean; language: string; onLanguageChange: (language: string) => void; }) => {
+  const [streamingPlatform, setStreamingPlatform] = useState('Spotify');
+  
   return (
     <Card className="shadow-2xl animate-in fade-in zoom-in-95 duration-500 w-full">
       <CardHeader>
@@ -41,8 +45,8 @@ export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected, onRefr
         </CardTitle>
         <CardDescription className="text-center pt-2">
             {isSpotifyConnected
-              ? "Here are some tracks we think you'll like."
-              : "Connect to Spotify to see album art and listen."}
+              ? "Here are some tracks we think you'll like. Click a song to listen on your selected platform."
+              : "Connect to Spotify to see album art and choose your streaming platform."}
         </CardDescription>
         <div className="pt-4 flex justify-center">
             {!isSpotifyConnected ? (
@@ -66,18 +70,33 @@ export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected, onRefr
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-2 mb-4 px-1">
-            <Languages className="w-5 h-5 text-muted-foreground" />
-            <Select onValueChange={onLanguageChange} defaultValue={language}>
-                <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a language" />
-                </SelectTrigger>
-                <SelectContent>
-                    {languages.map(lang => (
-                        <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+        <div className="grid sm:grid-cols-2 gap-4 mb-4 px-1">
+            <div className="flex items-center gap-2">
+                <Languages className="w-5 h-5 text-muted-foreground" />
+                <Select onValueChange={onLanguageChange} defaultValue={language}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {languages.map(lang => (
+                            <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-muted-foreground" />
+                <Select onValueChange={setStreamingPlatform} defaultValue={streamingPlatform}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a platform" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {platforms.map(platform => (
+                            <SelectItem key={platform} value={platform}>{platform}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
         <ScrollArea className="h-96 pr-4">
             <div className="space-y-2">
@@ -85,7 +104,7 @@ export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected, onRefr
                 Array.from({ length: 8 }).map((_, index) => <SongCardSkeleton key={index} />)
               ) : (
                 songs.map((song, index) => (
-                    <SongCard key={`${song.title}-${song.artist}-${index}`} song={song} isSpotifyConnected={isSpotifyConnected} />
+                    <SongCard key={`${song.title}-${song.artist}-${index}`} song={song} isSpotifyConnected={isSpotifyConnected} streamingPlatform={streamingPlatform} />
                 ))
               )}
             </div>

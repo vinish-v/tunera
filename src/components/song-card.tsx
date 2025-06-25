@@ -22,7 +22,7 @@ export const SongCardSkeleton = () => (
     </Card>
 );
 
-export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyConnected: boolean }) {
+export function SongCard({ song, isSpotifyConnected, streamingPlatform }: { song: Song; isSpotifyConnected: boolean; streamingPlatform: string; }) {
   const [track, setTrack] = useState<SpotifyApi.SingleTrackResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -56,18 +56,28 @@ export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyCo
   const songTitle = track?.name ?? song.title;
   const artistName = track?.artists.map(a => a.name).join(', ') ?? song.artist;
   const imageUrl = track?.album.images[0]?.url;
-  const trackUrl = track?.external_urls.spotify;
 
   const handleClick = () => {
-    if (isSpotifyConnected) {
-      if (trackUrl) {
-        window.open(trackUrl, '_blank', 'noopener,noreferrer');
-      }
-    } else {
-      toast({
-        title: "Connect to Spotify",
-        description: "Please connect your Spotify account to listen to this song.",
-      });
+    const query = encodeURIComponent(`${song.title} ${song.artist}`);
+    let url: string | undefined;
+
+    switch (streamingPlatform) {
+        case 'Spotify':
+            url = track?.external_urls.spotify ?? `https://open.spotify.com/search/${query}`;
+            break;
+        case 'YouTube':
+            url = `https://www.youtube.com/results?search_query=${query}`;
+            break;
+        case 'YouTube Music':
+            url = `https://music.youtube.com/search?q=${query}`;
+            break;
+        case 'Amazon Music':
+            url = `https://music.amazon.com/search/${query}`;
+            break;
+    }
+
+    if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -78,7 +88,7 @@ export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyCo
   return (
     <Card 
       onClick={handleClick}
-      className={`bg-background/50 group hover:bg-accent/50 hover:shadow-md transition-all duration-300 ${isSpotifyConnected && trackUrl ? 'cursor-pointer' : 'cursor-default'}`}
+      className="bg-background/50 group hover:bg-accent/50 hover:shadow-md transition-all duration-300 cursor-pointer"
     >
       <CardContent className="p-3 flex items-center gap-4">
           {imageUrl ? (
