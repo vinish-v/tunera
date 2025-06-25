@@ -18,6 +18,7 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
   const [loadingMessage, setLoadingMessage] = useState('');
   const [mood, setMood] = useState('');
   const [songs, setSongs] = useState<Song[]>([]);
+  const [isSuggestingSongs, setIsSuggestingSongs] = useState(false);
   const { toast } = useToast();
 
   const handleCapture = async (imageDataUri: string) => {
@@ -62,6 +63,31 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
     }
   };
 
+  const handleRefreshSongs = async () => {
+    if (!mood) return;
+
+    setIsSuggestingSongs(true);
+    try {
+      const { songs: suggestedSongs } = await suggestSongsForMood({ mood });
+
+      if (!suggestedSongs || suggestedSongs.length === 0) {
+        throw new Error("Song suggestion returned empty.");
+      }
+
+      setSongs(suggestedSongs);
+    } catch (error) {
+      console.error("Failed to refresh songs", error);
+      toast({
+        title: "Couldn't get new songs",
+        description: "There was an issue fetching new song suggestions. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSuggestingSongs(false);
+    }
+  };
+
+
   const handleReset = () => {
     setStep('intro');
     setMood('');
@@ -78,7 +104,14 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
       case 'loading':
         return <LoadingScreen message={loadingMessage} />;
       case 'results':
-        return <ResultsScreen mood={mood} songs={songs} onReset={handleReset} isSpotifyConnected={isSpotifyConnected} />;
+        return <ResultsScreen 
+          mood={mood} 
+          songs={songs} 
+          onReset={handleReset} 
+          isSpotifyConnected={isSpotifyConnected}
+          onRefresh={handleRefreshSongs}
+          isRefreshing={isSuggestingSongs}
+        />;
       default:
         return <IntroScreen onStart={() => setStep('camera')} />;
     }

@@ -4,7 +4,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SongCard } from "@/components/song-card";
+import { SongCard, SongCardSkeleton } from "@/components/song-card";
 import { RefreshCw, Sparkles } from 'lucide-react';
 
 const SpotifyIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -22,7 +22,7 @@ const SpotifyIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 type Song = { title: string; artist: string };
 
-export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected }: { mood: string; songs: Song[]; onReset: () => void; isSpotifyConnected: boolean; }) => {
+export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected, onRefresh, isRefreshing }: { mood: string; songs: Song[]; onReset: () => void; isSpotifyConnected: boolean; onRefresh: () => void; isRefreshing: boolean; }) => {
   return (
     <Card className="shadow-2xl animate-in fade-in zoom-in-95 duration-500 w-full">
       <CardHeader>
@@ -59,16 +59,33 @@ export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected }: { mo
       <CardContent>
         <ScrollArea className="h-64 sm:h-72 pr-4">
             <div className="space-y-2">
-                {songs.map((song, index) => (
+              {isRefreshing ? (
+                Array.from({ length: 3 }).map((_, index) => <SongCardSkeleton key={index} />)
+              ) : (
+                songs.map((song, index) => (
                     <SongCard key={index} song={song} isSpotifyConnected={isSpotifyConnected} />
-                ))}
+                ))
+              )}
             </div>
         </ScrollArea>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col sm:flex-row gap-2 pt-6">
         <Button onClick={onReset} variant="outline" className="w-full">
             <RefreshCw className="mr-2 h-4 w-4" />
             Try Again
+        </Button>
+        <Button onClick={onRefresh} disabled={isRefreshing} className="w-full">
+          {isRefreshing ? (
+              <>
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  Refreshing...
+              </>
+          ) : (
+              <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Get New Songs
+              </>
+          )}
         </Button>
       </CardFooter>
     </Card>

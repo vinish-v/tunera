@@ -9,6 +9,21 @@ import { useToast } from "@/hooks/use-toast";
 
 type Song = { title: string; artist: string };
 
+export const SongCardSkeleton = () => (
+    <Card>
+        <CardContent className="p-3 flex items-center gap-4">
+            <Skeleton className="h-16 w-16 rounded-md" />
+            <div className="flex-grow space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+            </div>
+             <div className="flex-shrink-0">
+                <Skeleton className="h-8 w-8 rounded-full" />
+            </div>
+        </CardContent>
+    </Card>
+);
+
 export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyConnected: boolean }) {
   const [track, setTrack] = useState<SpotifyApi.SingleTrackResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,20 +79,7 @@ export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyCo
   };
 
   if (isLoading && isSpotifyConnected) {
-    return (
-        <Card>
-            <CardContent className="p-3 flex items-center gap-4">
-                <Skeleton className="h-16 w-16 rounded-md" />
-                <div className="flex-grow space-y-2">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                </div>
-                 <div className="flex-shrink-0">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                </div>
-            </CardContent>
-        </Card>
-    );
+    return <SongCardSkeleton />;
   }
 
   return (
