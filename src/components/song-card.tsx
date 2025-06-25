@@ -140,16 +140,16 @@ export function SongCard({ song, streamingPlatform, initialTrack }: { song: Song
                 url: url,
             });
         } catch (error) {
-            if ((error as DOMException).name !== 'AbortError') {
-                console.error('Error sharing', error);
-                toast({
-                    title: "Sharing failed",
-                    description: "An error occurred while trying to share.",
-                    variant: "destructive"
-                });
+            // If the user cancels the share, it's not an error, so we do nothing.
+            if ((error as DOMException).name === 'AbortError') {
+                return;
             }
+            // For other errors (like "Permission Denied"), we fall back to the dialog.
+            console.error('Web Share API failed, falling back to dialog:', error);
+            setIsShareDialogOpen(true);
         }
     } else {
+        // Fallback for browsers that don't support the Web Share API.
         setIsShareDialogOpen(true);
     }
   };
