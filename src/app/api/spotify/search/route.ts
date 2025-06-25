@@ -20,18 +20,28 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Use a more flexible search query that combines title and artist.
-    const data = await spotifyApi.searchTracks(`${query} ${artist}`, { limit: 1 });
+    // Attempt a precise search first
+    const preciseQuery = `track:${query} artist:${artist}`;
+    let data = await spotifyApi.searchTracks(preciseQuery, { limit: 1 });
+    
     if (data.body.tracks && data.body.tracks.items.length > 0) {
       return NextResponse.json(data.body.tracks.items[0]);
-    } else {
-      // Fallback to searching just the title if the combined search fails.
-      const fallbackData = await spotifyApi.searchTracks(query, { limit: 1 });
-      if (fallbackData.body.tracks && fallbackData.body.tracks.items.length > 0) {
-        return NextResponse.json(fallbackData.body.tracks.items[0]);
-      }
-      return NextResponse.json({ error: 'Track not found' }, { status: 404 });
     }
+
+    // Fallback to a more general search if the precise one fails
+    data = await spotifyApi.searchTracks(`${query} ${artist}`, { limit: 1 });
+    if (data.body.tracks && data.body.tracks.items.length > 0) {
+      return NextResponse.json(data.body.tracks.items[0]);
+    }
+
+    // Final fallback to just the track name
+    data = await spotifyApi.searchTracks(query, { limit: 1 });
+    if (data.body.tracks && data.body.tracks.items.length > 0) {
+        return NextResponse.json(data.body.tracks.items[0]);
+    }
+    
+    return NextResponse.json({ error: 'Track not found' }, { status: 404 });
+
   } catch (error) {
     console.error('Spotify search error', error);
     // This could be a 401 if token expired. A real app would handle token refresh here.
