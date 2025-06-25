@@ -75,7 +75,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         if (!blob) throw new Error("Could not create image blob.");
 
         const link = document.createElement('a');
-        link.download = `camood-vibe-${songTitle}.png`;
+        link.download = `tunera-vibe-${songTitle}.png`;
         link.href = URL.createObjectURL(blob);
         link.click();
         URL.revokeObjectURL(link.href);
@@ -102,12 +102,12 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
             throw new Error('Failed to create image blob.');
         }
 
-        const file = new File([blob], `camood-vibe-${songTitle}.png`, { type: 'image/png' });
+        const file = new File([blob], `tunera-vibe-${songTitle}.png`, { type: 'image/png' });
 
         await navigator.share({
             files: [file],
-            title: 'My Camood Vibe',
-            text: `Feeling ${moodResult?.mood || 'great'}! Check out the vibe I just captured with Camood.`,
+            title: 'My Tunera Vibe',
+            text: `Feeling ${moodResult?.mood || 'great'}! Check out the vibe I just captured with Tunera.`,
         });
     } catch (error) {
         if ((error as DOMException).name !== 'AbortError') {
@@ -270,9 +270,9 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
       {selfieDataUri && moodResult && (
         <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
           <DialogContent className="max-h-[90svh] flex flex-col">
-            <DialogHeader className="sr-only">
-              <DialogTitle>Share Your Vibe</DialogTitle>
-              <DialogDescription>Share this mood card with your friends.</DialogDescription>
+            <DialogHeader>
+                <DialogTitle className="sr-only">Share Your Vibe</DialogTitle>
+                <DialogDescription className="sr-only">Share this mood card with your friends.</DialogDescription>
             </DialogHeader>
             <div className="py-4 overflow-y-auto">
               <MoodCardShare
@@ -303,5 +303,3 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
     </>
   );
 }
-
-    

@@ -26,7 +26,7 @@ export const MoodCardShare = React.forwardRef<HTMLDivElement, MoodCardShareProps
                 
                 <div className="absolute inset-0 flex flex-col justify-between p-6 text-white">
                     <div className="text-left">
-                        <h2 className="text-xl font-bold font-headline drop-shadow-lg">Camood</h2>
+                        <h2 className="text-xl font-bold font-headline drop-shadow-lg">Tunera</h2>
                     </div>
 
                     <div className="text-center space-y-4">

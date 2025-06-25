@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 export type FavouriteTrack = SpotifyApi.SingleTrackResponse;
 
-const FAVOURITES_KEY = 'camood_favourites';
+const FAVOURITES_KEY = 'tunera_favourites';
 
 export const useFavourites = () => {
   const [favourites, setFavourites] = useState<FavouriteTrack[]>([]);

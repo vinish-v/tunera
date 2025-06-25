@@ -14,7 +14,7 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Camood',
+  title: 'Tunera',
   description: 'Find music that matches your mood.',
 };
 
@@ -37,7 +37,7 @@ export default function RootLayout({
                 <SidebarHeader className="p-2 justify-between">
                     <div className="flex items-center gap-2">
                         <Music className="w-8 h-8 text-primary" />
-                        <span className="text-2xl font-headline group-data-[collapsible=icon]:hidden">Camood</span>
+                        <span className="text-2xl font-headline group-data-[collapsible=icon]:hidden">Tunera</span>
                     </div>
                     <SidebarTrigger className="hidden md:flex" />
                 </SidebarHeader>
@@ -83,7 +83,7 @@ export default function RootLayout({
                     <SidebarTrigger />
                     <div className="flex items-center gap-2 ml-2">
                         <Music className="w-6 h-6 text-primary" />
-                        <h1 className="text-xl font-headline">Camood</h1>
+                        <h1 className="text-xl font-headline">Tunera</h1>
                     </div>
                 </header>
                 {children}
