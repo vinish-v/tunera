@@ -79,10 +79,10 @@ export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected, onRefr
                 </SelectContent>
             </Select>
         </div>
-        <ScrollArea className="h-64 sm:h-72 pr-4">
+        <ScrollArea className="h-96 pr-4">
             <div className="space-y-2">
               {isRefreshing ? (
-                Array.from({ length: 3 }).map((_, index) => <SongCardSkeleton key={index} />)
+                Array.from({ length: 8 }).map((_, index) => <SongCardSkeleton key={index} />)
               ) : (
                 songs.map((song, index) => (
                     <SongCard key={`${song.title}-${song.artist}-${index}`} song={song} isSpotifyConnected={isSpotifyConnected} />

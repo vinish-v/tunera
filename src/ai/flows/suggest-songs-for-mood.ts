@@ -24,9 +24,9 @@ const SongSchema = z.object({
 const SuggestSongsForMoodOutputSchema = z.object({
   songs: z
     .array(SongSchema)
-    .min(3)
-    .max(5)
-    .describe('A list of 3 to 5 song suggestions for the given mood, including title and artist.'),
+    .min(8)
+    .max(8)
+    .describe('A list of 8 song suggestions for the given mood, including title and artist.'),
 });
 export type SuggestSongsForMoodOutput = z.infer<typeof SuggestSongsForMoodOutputSchema>;
 
@@ -45,7 +45,7 @@ const prompt = ai.definePrompt({
     Please suggest songs exclusively in the following language: {{{language}}}. Do not include songs in any other language.
     {{/if}}
     
-    Please provide a list of 3-5 songs that fit this specific mood. For each song, include the title and artist. Ensure the suggestions are highly relevant to the emotion. To ensure variety, provide a different set of songs each time you are asked for the same mood.`,
+    Please provide a list of 8 songs that fit this specific mood. For each song, include the title and artist. Ensure the suggestions are highly relevant to the emotion. To ensure variety, provide a different set of songs each time you are asked for the same mood.`,
 });
 
 const suggestSongsForMoodFlow = ai.defineFlow(
