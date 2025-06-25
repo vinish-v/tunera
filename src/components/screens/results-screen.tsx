@@ -28,7 +28,7 @@ type ResultsScreenProps = {
 }
 
 
-const languages = ['YouTube', 'Arabic', 'Bengali', 'Dutch', 'English', 'French', 'German', 'Gujarati', 'Hindi', 'Indonesian', 'Italian', 'Japanese', 'Kannada', 'Korean', 'Malayalam', 'Mandarin', 'Marathi', 'Odia', 'Polish', 'Portuguese', 'Punjabi', 'Russian', 'Spanish', 'Tamil', 'Telugu', 'Thai', 'Turkish', 'Urdu', 'Vietnamese'];
+const languages = ['Arabic', 'Bengali', 'Dutch', 'English', 'French', 'German', 'Gujarati', 'Hindi', 'Indonesian', 'Italian', 'Japanese', 'Kannada', 'Korean', 'Malayalam', 'Mandarin', 'Marathi', 'Odia', 'Polish', 'Portuguese', 'Punjabi', 'Russian', 'Spanish', 'Tamil', 'Telugu', 'Thai', 'Turkish', 'Urdu', 'Vietnamese'];
 const platforms = ['YouTube', 'Spotify', 'YouTube Music', 'Amazon Music'];
 
 export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRefresh, isRefreshing, language, onLanguageChange, refreshKey }: ResultsScreenProps) => {
@@ -74,7 +74,7 @@ export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRef
                 </Select>
             </div>
         </div>
-        <ScrollArea className="h-[26rem] pr-4">
+        <ScrollArea className="h-96 pr-4">
             <div className="space-y-2">
               {isRefreshing ? (
                 Array.from({ length: 8 }).map((_, index) => <SongCardSkeleton key={index} />)

@@ -8,7 +8,7 @@ export default function AboutPage() {
         <main className="flex flex-1 flex-col items-center p-4 sm:p-8">
             <Card className="w-full max-w-lg">
                 <CardHeader>
-                    <CardTitle className="text-center text-3xl font-headline">About Tunera</CardTitle>
+                    <CardTitle className="text-center text-2xl sm:text-3xl font-headline">About Tunera</CardTitle>
                     <CardDescription className="text-center pt-2">
                         Meet the team behind the music and the mood.
                     </CardDescription>
