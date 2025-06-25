@@ -8,11 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Play, Heart } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-const platforms = ['Spotify', 'YouTube', 'YouTube Music', 'Amazon Music'];
+const platforms = ['YouTube', 'Spotify', 'YouTube Music', 'Amazon Music'];
 
 export default function FavouritesPage() {
     const { favourites, isLoaded } = useFavourites();
-    const [streamingPlatform, setStreamingPlatform] = useState('Spotify');
+    const [streamingPlatform, setStreamingPlatform] = useState('YouTube');
     const [hasMounted, setHasMounted] = useState(false);
 
     useEffect(() => {

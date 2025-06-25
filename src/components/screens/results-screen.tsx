@@ -30,10 +30,10 @@ import { useToast } from "@/hooks/use-toast";
 type Song = { title: string; artist: string };
 
 const languages = ['Arabic', 'Bengali', 'Dutch', 'English', 'French', 'German', 'Gujarati', 'Hindi', 'Indonesian', 'Italian', 'Japanese', 'Kannada', 'Korean', 'Malayalam', 'Mandarin', 'Marathi', 'Odia', 'Polish', 'Portuguese', 'Punjabi', 'Russian', 'Spanish', 'Tamil', 'Telugu', 'Thai', 'Turkish', 'Urdu', 'Vietnamese'];
-const platforms = ['Spotify', 'YouTube', 'YouTube Music', 'Amazon Music'];
+const platforms = ['YouTube', 'Spotify', 'YouTube Music', 'Amazon Music'];
 
 export const ResultsScreen = ({ mood, songs, onReset, onRefresh, isRefreshing, language, onLanguageChange, refreshKey, selfie, emoji }: { mood: string; songs: Song[]; onReset: () => void; onRefresh: () => void; isRefreshing: boolean; language: string; onLanguageChange: (language: string) => void; refreshKey: number; selfie: string; emoji: string; }) => {
-  const [streamingPlatform, setStreamingPlatform] = useState('Spotify');
+  const [streamingPlatform, setStreamingPlatform] = useState('YouTube');
   const cardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [canShare, setCanShare] = useState(false);
