@@ -40,9 +40,9 @@ const prompt = ai.definePrompt({
     output: {schema: SuggestSongsForMoodOutputSchema},
     prompt: `You are a music expert and world-class DJ specializing in creating playlists that perfectly match a given emotion. Your task is to suggest a few songs that embody the provided mood.
 
-    The mood is: {{{mood}}}
+    The mood is: {{{mood}}}.
     {{#if language}}
-    Please suggest songs primarily in the following language: {{{language}}}.
+    Please suggest songs exclusively in the following language: {{{language}}}. Do not include songs in any other language.
     {{/if}}
     
     Please provide a list of 3-5 songs that fit this specific mood. For each song, include the title and artist. Ensure the suggestions are highly relevant to the emotion. To ensure variety, provide a different set of songs each time you are asked for the same mood.`,
