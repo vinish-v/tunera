@@ -7,10 +7,11 @@ import { SongCard, SongCardSkeleton } from '@/components/song-card';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Play, Heart } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ProtectedRoute } from '@/hooks/use-auth';
 
 const platforms = ['YouTube', 'Spotify', 'YouTube Music', 'Amazon Music'];
 
-export default function FavouritesPage() {
+function FavouritesPageContent() {
     const { favourites, isLoaded } = useFavourites();
     const [streamingPlatform, setStreamingPlatform] = useState('YouTube');
     const [hasMounted, setHasMounted] = useState(false);
@@ -86,4 +87,12 @@ export default function FavouritesPage() {
             </Card>
         </main>
     );
+}
+
+export default function FavouritesPage() {
+    return (
+        <ProtectedRoute>
+            <FavouritesPageContent />
+        </ProtectedRoute>
+    )
 }

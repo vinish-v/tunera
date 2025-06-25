@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Library, Play, Pause, SkipBack, SkipForward, Music, Upload } from 'lucide-react';
+import { ProtectedRoute } from '@/hooks/use-auth';
 
-export default function MyMusicPage() {
+function MyMusicPageContent() {
     const [playlist, setPlaylist] = useState<File[]>([]);
     const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -168,5 +169,13 @@ export default function MyMusicPage() {
                 </CardContent>
             </Card>
         </main>
+    );
+}
+
+export default function MyMusicPage() {
+    return (
+        <ProtectedRoute>
+            <MyMusicPageContent />
+        </ProtectedRoute>
     );
 }
