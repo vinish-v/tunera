@@ -1,9 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, Music } from 'lucide-react';
-import Image from 'next/image';
 
 export const IntroScreen = ({ onStart }: { onStart: () => void }) => {
   return (
@@ -19,17 +18,7 @@ export const IntroScreen = ({ onStart }: { onStart: () => void }) => {
             Just take a selfie and let our AI do the rest.
         </CardDescription>
       </CardHeader>
-      <CardContent className="px-6 sm:px-8">
-        <Image 
-          src="https://placehold.co/600x400.png" 
-          alt="Abstract representation of music and emotions"
-          data-ai-hint="music emotion"
-          width={600}
-          height={400}
-          className="rounded-lg shadow-md"
-        />
-      </CardContent>
-      <CardFooter className="p-6 sm:p-8">
+      <CardFooter className="p-6 sm:p-8 pt-4">
         <Button onClick={onStart} className="w-full" size="lg">
           <Sparkles className="mr-2 h-5 w-5" />
           Find My Vibe
