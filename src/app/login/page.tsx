@@ -11,7 +11,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { LogIn } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -46,8 +45,8 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <form onSubmit={handleLogin}>
           <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
-                <LogIn/> Login to Tunera
+            <CardTitle className="text-2xl">
+              Login to Tunera
             </CardTitle>
             <CardDescription>
               Enter your email below to login to your account.
