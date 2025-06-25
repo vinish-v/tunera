@@ -25,6 +25,7 @@ const MoodEnum = z.enum(['happy', 'sad', 'energetic', 'calm', 'romantic', 'fear'
 
 const PredictMoodFromSelfieOutputSchema = z.object({
   mood: MoodEnum.describe('The predicted mood from the selfie. Must be one of happy, sad, energetic, calm, romantic, fear, anger, surprise, or disgust.'),
+  emoji: z.string().describe('A single emoji that represents the mood.'),
 });
 export type PredictMoodFromSelfieOutput = z.infer<typeof PredictMoodFromSelfieOutputSchema>;
 
@@ -40,9 +41,11 @@ const prompt = ai.definePrompt({
 
 You MUST classify the mood into one of the following categories: happy, sad, energetic, calm, romantic, fear, anger, surprise, disgust.
 
+You MUST also provide a single emoji character that represents the predicted mood.
+
 Selfie: {{media url=photoDataUri}}
 
-Respond with only the mood category.`,
+Respond with the mood category and the emoji.`,
 });
 
 const predictMoodFromSelfieFlow = ai.defineFlow(

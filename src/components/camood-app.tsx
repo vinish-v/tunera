@@ -21,6 +21,8 @@ export default function CamoodApp() {
   const [isSuggestingSongs, setIsSuggestingSongs] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [language, setLanguage] = useState('English');
+  const [selfie, setSelfie] = useState('');
+  const [emoji, setEmoji] = useState('');
   const { toast } = useToast();
 
   const handleCapture = async (imageDataUri: string) => {
@@ -33,16 +35,18 @@ export default function CamoodApp() {
         setStep('camera');
         return;
     }
+    setSelfie(imageDataUri);
     setStep('loading');
     try {
       setLoadingMessage('Analyzing your vibe...');
-      const { mood: predictedMood } = await predictMoodFromSelfie({ photoDataUri: imageDataUri });
+      const { mood: predictedMood, emoji: predictedEmoji } = await predictMoodFromSelfie({ photoDataUri: imageDataUri });
       
-      if (!predictedMood) {
-        throw new Error("Mood prediction returned empty.");
+      if (!predictedMood || !predictedEmoji) {
+        throw new Error("Mood or emoji prediction returned empty.");
       }
 
       setMood(predictedMood);
+      setEmoji(predictedEmoji);
 
       setLoadingMessage('Finding your perfect playlist...');
       const { songs: suggestedSongs } = await suggestSongsForMood({ mood: predictedMood, language });
@@ -103,6 +107,8 @@ export default function CamoodApp() {
     setSongs([]);
     setLoadingMessage('');
     setLanguage('English');
+    setSelfie('');
+    setEmoji('');
   };
 
   const renderStep = () => {
@@ -124,6 +130,8 @@ export default function CamoodApp() {
           isRefreshing={isSuggestingSongs}
           language={language}
           onLanguageChange={handleLanguageChange}
+          selfie={selfie}
+          emoji={emoji}
         />;
       default:
         return <IntroScreen onStart={() => setStep('camera')} />;
