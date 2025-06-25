@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -16,7 +17,8 @@ type Song = { title: string; artist: string };
 export default function CamoodApp() {
   const [step, setStep] = useState<Step>('intro');
   const [loadingMessage, setLoadingMessage] = useState('');
-  const [mood, setMood] = useState('');
+  const [moodResult, setMoodResult] = useState<{ mood: string; emoji: string } | null>(null);
+  const [selfieDataUri, setSelfieDataUri] = useState<string | null>(null);
   const [songs, setSongs] = useState<Song[]>([]);
   const [isSuggestingSongs, setIsSuggestingSongs] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -33,6 +35,7 @@ export default function CamoodApp() {
         setStep('camera');
         return;
     }
+    setSelfieDataUri(imageDataUri);
     setStep('loading');
     try {
       setLoadingMessage('Analyzing your vibe...');
@@ -42,7 +45,7 @@ export default function CamoodApp() {
         throw new Error("Mood or emoji prediction returned empty.");
       }
 
-      setMood(predictedMood);
+      setMoodResult({ mood: predictedMood, emoji: predictedEmoji });
 
       setLoadingMessage('Finding your perfect playlist...');
       const { songs: suggestedSongs } = await suggestSongsForMood({ mood: predictedMood, language });
@@ -67,12 +70,12 @@ export default function CamoodApp() {
   };
 
   const handleRefreshSongs = async (newLanguage?: string) => {
-    if (!mood) return;
+    if (!moodResult?.mood) return;
 
     setIsSuggestingSongs(true);
     try {
       const langToUse = newLanguage || language;
-      const { songs: suggestedSongs } = await suggestSongsForMood({ mood, language: langToUse });
+      const { songs: suggestedSongs } = await suggestSongsForMood({ mood: moodResult.mood, language: langToUse });
 
       if (!suggestedSongs || suggestedSongs.length === 0) {
         throw new Error("Song suggestion returned empty.");
@@ -99,7 +102,8 @@ export default function CamoodApp() {
 
   const handleReset = () => {
     setStep('intro');
-    setMood('');
+    setMoodResult(null);
+    setSelfieDataUri(null);
     setSongs([]);
     setLoadingMessage('');
     setLanguage('English');
@@ -117,7 +121,8 @@ export default function CamoodApp() {
         return <ResultsScreen 
           key={refreshKey}
           refreshKey={refreshKey}
-          mood={mood} 
+          moodResult={moodResult!}
+          selfieDataUri={selfieDataUri!}
           songs={songs} 
           onReset={handleReset} 
           onRefresh={() => handleRefreshSongs()}
