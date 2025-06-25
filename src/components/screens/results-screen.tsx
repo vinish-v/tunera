@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,7 @@ export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected }: { mo
         <div className="pt-4 flex justify-center">
             {!isSpotifyConnected ? (
               <Button asChild>
-                <a href="/api/auth/spotify/login">
+                <a href="/api/auth/spotify/login" target="_blank" rel="noopener noreferrer">
                   <SpotifyIcon className="w-5 h-5 mr-2" />
                   Connect to Spotify
                 </a>
