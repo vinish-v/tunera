@@ -16,20 +16,33 @@ const SuggestSongsForMoodInputSchema = z.object({
 export type SuggestSongsForMoodInput = z.infer<typeof SuggestSongsForMoodInputSchema>;
 
 const SongSchema = z.object({
-    title: z.string(),
-    artist: z.string(),
+    title: z.string().describe("The title of the song."),
+    artist: z.string().describe("The artist of the song."),
 });
 
 const SuggestSongsForMoodOutputSchema = z.object({
   songs: z
     .array(SongSchema)
-    .describe('A list of song suggestions for the given mood, including title and artist.'),
+    .min(3)
+    .max(5)
+    .describe('A list of 3 to 5 song suggestions for the given mood, including title and artist.'),
 });
 export type SuggestSongsForMoodOutput = z.infer<typeof SuggestSongsForMoodOutputSchema>;
 
 export async function suggestSongsForMood(input: SuggestSongsForMoodInput): Promise<SuggestSongsForMoodOutput> {
   return suggestSongsForMoodFlow(input);
 }
+
+const prompt = ai.definePrompt({
+    name: 'suggestSongsPrompt',
+    input: {schema: SuggestSongsForMoodInputSchema},
+    output: {schema: SuggestSongsForMoodOutputSchema},
+    prompt: `You are a world-class DJ. Given a mood, suggest a few songs that fit that vibe.
+
+    Mood: {{{mood}}}
+    
+    Provide a list of 3-5 songs. For each song, include the title and artist.`,
+});
 
 const suggestSongsForMoodFlow = ai.defineFlow(
   {
@@ -38,37 +51,17 @@ const suggestSongsForMoodFlow = ai.defineFlow(
     outputSchema: SuggestSongsForMoodOutputSchema,
   },
   async (input) => {
-    const songMap: { [key: string]: { title: string; artist: string }[] } = {
-        happy: [
-            { title: 'Walking on Sunshine', artist: 'Katrina & The Waves' },
-            { title: 'Happy', artist: 'Pharrell Williams' },
-            { title: 'Lovely Day', artist: 'Bill Withers' },
+    const {output} = await prompt(input);
+    if (!output || output.songs.length === 0) {
+      // Fallback in case the model fails or returns an empty list
+      return {
+        songs: [
+          { title: "Don't Worry, Be Happy", artist: 'Bobby McFerrin' },
+          { title: 'Three Little Birds', artist: 'Bob Marley & The Wailers' },
+          { title: 'Here Comes The Sun', artist: 'The Beatles' },
         ],
-        sad: [
-            { title: 'Hallelujah', artist: 'Leonard Cohen' },
-            { title: 'Tears in Heaven', artist: 'Eric Clapton' },
-            { title: 'Someone Like You', artist: 'Adele' },
-        ],
-        energetic: [
-            { title: 'Uptown Funk', artist: 'Mark Ronson ft. Bruno Mars' },
-            { title: 'September', artist: 'Earth, Wind & Fire' },
-            { title: 'Don\'t Stop Me Now', artist: 'Queen' },
-        ],
-        calm: [
-            { title: 'Watermark', artist: 'Enya' },
-            { title: 'Clair de Lune', artist: 'Claude Debussy' },
-            { title: 'A Sky Full of Stars', artist: 'Coldplay' },
-        ],
-        romantic: [
-            { title: 'Perfect', artist: 'Ed Sheeran' },
-            { title: 'All of Me', artist: 'John Legend' },
-            { title: 'Can\'t Help Falling in Love', artist: 'Elvis Presley' },
-        ],
-    };
-
-    const mood = input.mood.toLowerCase();
-    const songs = songMap[mood] || [{ title: 'Default Song 1', artist: 'The Defaults' }];
-
-    return { songs };
+      };
+    }
+    return output;
   }
 );
