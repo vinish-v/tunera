@@ -15,10 +15,15 @@ const SuggestSongsForMoodInputSchema = z.object({
 });
 export type SuggestSongsForMoodInput = z.infer<typeof SuggestSongsForMoodInputSchema>;
 
+const SongSchema = z.object({
+    title: z.string(),
+    artist: z.string(),
+});
+
 const SuggestSongsForMoodOutputSchema = z.object({
   songs: z
-    .array(z.string())
-    .describe('A list of song suggestions for the given mood.'),
+    .array(SongSchema)
+    .describe('A list of song suggestions for the given mood, including title and artist.'),
 });
 export type SuggestSongsForMoodOutput = z.infer<typeof SuggestSongsForMoodOutputSchema>;
 
@@ -33,16 +38,36 @@ const suggestSongsForMoodFlow = ai.defineFlow(
     outputSchema: SuggestSongsForMoodOutputSchema,
   },
   async (input) => {
-    const songMap: { [key: string]: string[] } = {
-      happy: ['Walking on Sunshine', 'Happy', 'Lovely Day'],
-      sad: ['Hallelujah', 'Tears in Heaven', 'Someone Like You'],
-      energetic: ['Uptown Funk', 'September', 'Don\'t Stop Me Now'],
-      calm: ['Watermark', 'Clair de Lune', 'A Sky Full of Stars'],
-      romantic: ['Perfect', 'All of Me', 'Can\'t Help Falling in Love'],
+    const songMap: { [key: string]: { title: string; artist: string }[] } = {
+        happy: [
+            { title: 'Walking on Sunshine', artist: 'Katrina & The Waves' },
+            { title: 'Happy', artist: 'Pharrell Williams' },
+            { title: 'Lovely Day', artist: 'Bill Withers' },
+        ],
+        sad: [
+            { title: 'Hallelujah', artist: 'Leonard Cohen' },
+            { title: 'Tears in Heaven', artist: 'Eric Clapton' },
+            { title: 'Someone Like You', artist: 'Adele' },
+        ],
+        energetic: [
+            { title: 'Uptown Funk', artist: 'Mark Ronson ft. Bruno Mars' },
+            { title: 'September', artist: 'Earth, Wind & Fire' },
+            { title: 'Don\'t Stop Me Now', artist: 'Queen' },
+        ],
+        calm: [
+            { title: 'Watermark', artist: 'Enya' },
+            { title: 'Clair de Lune', artist: 'Claude Debussy' },
+            { title: 'A Sky Full of Stars', artist: 'Coldplay' },
+        ],
+        romantic: [
+            { title: 'Perfect', artist: 'Ed Sheeran' },
+            { title: 'All of Me', artist: 'John Legend' },
+            { title: 'Can\'t Help Falling in Love', artist: 'Elvis Presley' },
+        ],
     };
 
     const mood = input.mood.toLowerCase();
-    const songs = songMap[mood] || ['Default Song 1', 'Default Song 2', 'Default Song 3'];
+    const songs = songMap[mood] || [{ title: 'Default Song 1', artist: 'The Defaults' }];
 
     return { songs };
   }

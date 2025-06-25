@@ -11,12 +11,13 @@ import { LoadingScreen } from '@/components/screens/loading-screen';
 import { ResultsScreen } from '@/components/screens/results-screen';
 
 type Step = 'intro' | 'camera' | 'loading' | 'results';
+type Song = { title: string; artist: string };
 
-export default function CamoodApp() {
+export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: boolean }) {
   const [step, setStep] = useState<Step>('intro');
   const [loadingMessage, setLoadingMessage] = useState('');
   const [mood, setMood] = useState('');
-  const [songs, setSongs] = useState<string[]>([]);
+  const [songs, setSongs] = useState<Song[]>([]);
   const { toast } = useToast();
 
   const handleCapture = async (imageDataUri: string) => {
@@ -77,7 +78,7 @@ export default function CamoodApp() {
       case 'loading':
         return <LoadingScreen message={loadingMessage} />;
       case 'results':
-        return <ResultsScreen mood={mood} songs={songs} onReset={handleReset} />;
+        return <ResultsScreen mood={mood} songs={songs} onReset={handleReset} isSpotifyConnected={isSpotifyConnected} />;
       default:
         return <IntroScreen onStart={() => setStep('camera')} />;
     }

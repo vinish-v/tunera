@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,7 +20,9 @@ const SpotifyIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
   );
 
-export const ResultsScreen = ({ mood, songs, onReset }: { mood: string; songs: string[]; onReset: () => void; }) => {
+type Song = { title: string; artist: string };
+
+export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected }: { mood: string; songs: Song[]; onReset: () => void; isSpotifyConnected: boolean; }) => {
   return (
     <Card className="shadow-2xl animate-in fade-in zoom-in-95 duration-500 w-full">
       <CardHeader>
@@ -27,19 +30,37 @@ export const ResultsScreen = ({ mood, songs, onReset }: { mood: string; songs: s
             <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-primary"/>
             Your Vibe is: {mood}
         </CardTitle>
-        <CardDescription className="text-center pt-2">Here are some tracks we think you'll like. Connect to Spotify to listen.</CardDescription>
+        <CardDescription className="text-center pt-2">
+            {isSpotifyConnected
+              ? "Here are some tracks we think you'll like."
+              : "Connect to Spotify to see album art and listen."}
+        </CardDescription>
         <div className="pt-4 flex justify-center">
-            <Button>
-                <SpotifyIcon className="w-5 h-5 mr-2" />
-                Connect to Spotify
-            </Button>
+            {!isSpotifyConnected ? (
+              <Button asChild>
+                <Link href="/api/auth/spotify/login">
+                  <SpotifyIcon className="w-5 h-5 mr-2" />
+                  Connect to Spotify
+                </Link>
+              </Button>
+            ) : (
+                <div className='flex flex-col items-center gap-2'>
+                    <p className='text-sm text-green-400 font-semibold flex items-center gap-2'>
+                        <SpotifyIcon className="w-5 h-5"/>
+                        Connected to Spotify
+                    </p>
+                    <Button variant="outline" size="sm" asChild>
+                        <Link href="/api/auth/spotify/logout">Disconnect</Link>
+                    </Button>
+                </div>
+            )}
         </div>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-64 sm:h-72 pr-4">
             <div className="space-y-2">
                 {songs.map((song, index) => (
-                    <SongCard key={index} songTitle={song} />
+                    <SongCard key={index} song={song} isSpotifyConnected={isSpotifyConnected} />
                 ))}
             </div>
         </ScrollArea>
