@@ -212,7 +212,8 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
   };
 
   if (isLoading && !initialTrack) {
-    return <SongCardSkeleton />;
+    // This previously returned a skeleton, causing a "double loading" effect.
+    // The component is now robust enough to render its layout with placeholders.
   }
 
   return (
