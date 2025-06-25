@@ -25,6 +25,13 @@ export const viewport: Viewport = {
   themeColor: "#1A191B",
 };
 
+const navItems = [
+    { href: '/', label: 'Home', icon: Sparkles },
+    { href: '/favourites', label: 'Favourites', icon: Heart },
+    { href: '/my-music', label: 'My Music', icon: Library },
+    { href: '/about', label: 'About Us', icon: Info },
+];
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -81,16 +88,25 @@ export default function RootLayout({
                 </SidebarContent>
             </Sidebar>
             <SidebarInset>
-                <header className="flex items-center justify-start p-2 border-b md:hidden sticky top-0 bg-background/80 backdrop-blur-sm z-10">
-                    <SidebarTrigger />
-                    <div className="flex items-center gap-2 ml-2">
-                        <Music className="w-6 h-6 text-primary" />
-                        <h1 className="text-xl font-headline">Tunera</h1>
-                    </div>
-                </header>
                 {children}
             </SidebarInset>
         </SidebarProvider>
+        
+        <footer className="fixed bottom-0 left-0 right-0 h-16 border-t bg-background/95 backdrop-blur-sm md:hidden z-20">
+            <nav className="flex h-full items-center justify-around">
+                {navItems.map((item) => (
+                    <Link
+                        key={item.href}
+                        href={item.href}
+                        className="flex flex-col items-center justify-center gap-1 w-full h-full text-muted-foreground transition-colors hover:text-primary"
+                    >
+                        <item.icon className="w-6 h-6" />
+                        <span className="text-xs">{item.label}</span>
+                    </Link>
+                ))}
+            </nav>
+        </footer>
+
         <Toaster />
       </body>
     </html>
