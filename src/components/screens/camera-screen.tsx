@@ -52,6 +52,9 @@ export const CameraScreen = ({ onCapture }: { onCapture: (imageDataUri: string) 
     canvas.height = video.videoHeight;
     const context = canvas.getContext('2d');
     if (context) {
+        // Flip the context horizontally to un-mirror the selfie
+        context.translate(video.videoWidth, 0);
+        context.scale(-1, 1);
         context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
         const dataUri = canvas.toDataURL('image/jpeg');
         onCapture(dataUri);
@@ -83,7 +86,7 @@ export const CameraScreen = ({ onCapture }: { onCapture: (imageDataUri: string) 
             autoPlay
             playsInline
             muted
-            className={`w-full h-full object-cover transition-opacity duration-500 ${isCameraReady ? 'opacity-100' : 'opacity-0'}`}
+            className={`w-full h-full object-cover transform -scale-x-100 transition-opacity duration-500 ${isCameraReady ? 'opacity-100' : 'opacity-0'}`}
           />
           <canvas ref={canvasRef} className="hidden" />
         </div>

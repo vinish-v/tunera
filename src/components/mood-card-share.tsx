@@ -19,7 +19,7 @@ export const MoodCardShare = React.forwardRef<HTMLDivElement, MoodCardShareProps
         return (
             <div ref={ref} className={cn("relative aspect-[9/16] w-full max-w-[300px] mx-auto overflow-hidden rounded-lg bg-card", className)} {...props}>
                 {selfieDataUri && (
-                    <Image src={selfieDataUri} alt="User selfie" layout="fill" objectFit="cover" className="transform -scale-x-100" />
+                    <Image src={selfieDataUri} alt="User selfie" layout="fill" objectFit="cover" />
                 )}
                 <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
                 
