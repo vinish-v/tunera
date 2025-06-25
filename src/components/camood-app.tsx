@@ -19,6 +19,7 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
   const [mood, setMood] = useState('');
   const [songs, setSongs] = useState<Song[]>([]);
   const [isSuggestingSongs, setIsSuggestingSongs] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
 
   const handleCapture = async (imageDataUri: string) => {
@@ -50,6 +51,7 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
       }
       
       setSongs(suggestedSongs);
+      setRefreshKey(Date.now());
 
       setStep('results');
     } catch (error) {
@@ -75,6 +77,7 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
       }
 
       setSongs(suggestedSongs);
+      setRefreshKey(Date.now());
     } catch (error) {
       console.error("Failed to refresh songs", error);
       toast({
@@ -105,6 +108,7 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
         return <LoadingScreen message={loadingMessage} />;
       case 'results':
         return <ResultsScreen 
+          key={refreshKey}
           mood={mood} 
           songs={songs} 
           onReset={handleReset} 
