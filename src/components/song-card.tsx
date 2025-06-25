@@ -22,7 +22,7 @@ export const SongCardSkeleton = () => (
     </Card>
 );
 
-export function SongCard({ song, isSpotifyConnected, streamingPlatform }: { song: Song; isSpotifyConnected: boolean; streamingPlatform: string; }) {
+export function SongCard({ song, streamingPlatform }: { song: Song; streamingPlatform: string; }) {
   const [track, setTrack] = useState<SpotifyApi.SingleTrackResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();

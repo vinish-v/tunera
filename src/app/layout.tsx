@@ -41,7 +41,7 @@ export default function RootLayout({
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <SidebarMenuButton tooltip="Account" asChild>
-                                <Link href="#">
+                                <Link href="/account">
                                     <User />
                                     <span>Account</span>
                                 </Link>

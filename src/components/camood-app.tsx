@@ -13,7 +13,7 @@ import { ResultsScreen } from '@/components/screens/results-screen';
 type Step = 'intro' | 'camera' | 'loading' | 'results';
 type Song = { title: string; artist: string };
 
-export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: boolean }) {
+export default function CamoodApp() {
   const [step, setStep] = useState<Step>('intro');
   const [loadingMessage, setLoadingMessage] = useState('');
   const [mood, setMood] = useState('');
@@ -119,7 +119,6 @@ export default function CamoodApp({ isSpotifyConnected }: { isSpotifyConnected: 
           mood={mood} 
           songs={songs} 
           onReset={handleReset} 
-          isSpotifyConnected={isSpotifyConnected}
           onRefresh={() => handleRefreshSongs()}
           isRefreshing={isSuggestingSongs}
           language={language}
