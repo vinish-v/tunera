@@ -22,6 +22,19 @@ export default function SignupPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Password validation regex: at least one letter, one number, and 6+ characters.
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
+
+    if (!passwordRegex.test(password)) {
+      toast({
+        title: 'Weak Password',
+        description: 'Password must be at least 6 characters long and include both letters and numbers.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, email, password);
@@ -71,10 +84,12 @@ export default function SignupPage() {
                 id="password" 
                 type="password" 
                 required 
-                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <p className="text-xs text-muted-foreground">
+                Must be 6+ characters and include letters and numbers.
+              </p>
             </div>
           </CardContent>
           <CardFooter className="flex-col items-stretch">
