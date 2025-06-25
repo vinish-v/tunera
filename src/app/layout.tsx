@@ -29,7 +29,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <SidebarProvider>
-            <Sidebar>
+            <Sidebar collapsible="icon">
                 <SidebarHeader className="p-2 justify-between">
                     <div className="flex items-center gap-2">
                         <Music className="w-8 h-8 text-primary" />
