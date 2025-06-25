@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ export const IntroScreen = ({ onStart }: { onStart: () => void }) => {
             Tunera
         </CardTitle>
         <CardDescription className="pt-2 text-sm sm:text-base max-w-md mx-auto">
-            Discover music that truly matches your mood. Just snap a selfie, and let our AI curate a personalized playlist for you. Save your favorite tracks and share your unique musical vibe with the world.
+            Snap a selfie to get a playlist that matches your mood.
         </CardDescription>
       </CardHeader>
       <CardFooter className="p-6 sm:p-8 pt-4">
