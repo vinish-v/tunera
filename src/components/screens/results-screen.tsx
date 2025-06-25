@@ -34,7 +34,7 @@ type ResultsScreenProps = {
 }
 
 
-const languages = ['Arabic', 'Bengali', 'Dutch', 'English', 'French', 'German', 'Gujarati', 'Hindi', 'Indonesian', 'Italian', 'Japanese', 'Kannada', 'Korean', 'Malayalam', 'Mandarin', 'Marathi', 'Odia', 'Polish', 'Portuguese', 'Punjabi', 'Russian', 'Spanish', 'Tamil', 'Telugu', 'Thai', 'Turkish', 'Urdu', 'Vietnamese'];
+const languages = ['YouTube', 'Arabic', 'Bengali', 'Dutch', 'English', 'French', 'German', 'Gujarati', 'Hindi', 'Indonesian', 'Italian', 'Japanese', 'Kannada', 'Korean', 'Malayalam', 'Mandarin', 'Marathi', 'Odia', 'Polish', 'Portuguese', 'Punjabi', 'Russian', 'Spanish', 'Tamil', 'Telugu', 'Thai', 'Turkish', 'Urdu', 'Vietnamese'];
 const platforms = ['YouTube', 'Spotify', 'YouTube Music', 'Amazon Music'];
 
 export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRefresh, isRefreshing, language, onLanguageChange, refreshKey }: ResultsScreenProps) => {
@@ -43,6 +43,27 @@ export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRef
   const [isSharing, setIsSharing] = useState(false);
   const moodCardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  const handleDownload = useCallback(async () => {
+      if (!moodCardRef.current) return;
+      setIsSharing(true);
+      try {
+          const dataUrl = await toPng(moodCardRef.current, { quality: 0.95, pixelRatio: 2 });
+          const link = document.createElement('a');
+          link.download = 'camood-vibe.png';
+          link.href = dataUrl;
+          link.click();
+      } catch (error) {
+          console.error('Download failed', error);
+          toast({
+              title: 'Download failed',
+              description: 'Could not generate image for download.',
+              variant: 'destructive'
+          });
+      } finally {
+          setIsSharing(false);
+      }
+  }, [toast]);
 
   const handleShare = useCallback(async () => {
     if (!moodCardRef.current) return;
@@ -82,27 +103,6 @@ export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRef
         setIsShareOpen(false);
     }
   }, [toast, handleDownload]);
-
-  const handleDownload = useCallback(async () => {
-      if (!moodCardRef.current) return;
-      setIsSharing(true);
-      try {
-          const dataUrl = await toPng(moodCardRef.current, { quality: 0.95, pixelRatio: 2 });
-          const link = document.createElement('a');
-          link.download = 'camood-vibe.png';
-          link.href = dataUrl;
-          link.click();
-      } catch (error) {
-          console.error('Download failed', error);
-          toast({
-              title: 'Download failed',
-              description: 'Could not generate image for download.',
-              variant: 'destructive'
-          });
-      } finally {
-          setIsSharing(false);
-      }
-  }, [toast]);
   
   return (
     <>
