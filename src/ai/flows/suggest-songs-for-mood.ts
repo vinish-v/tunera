@@ -26,45 +26,24 @@ export async function suggestSongsForMood(input: SuggestSongsForMoodInput): Prom
   return suggestSongsForMoodFlow(input);
 }
 
-const getSongsForMood = ai.defineTool({
-  name: 'getSongsForMood',
-  description: 'Returns a list of songs that match the given mood.',
-  inputSchema: z.object({
-    mood: z.string().describe('The mood to find songs for.'),
-  }),
-  outputSchema: z.array(z.string()),
-}, async (input) => {
-  const songMap: { [key: string]: string[] } = {
-    happy: ['Walking on Sunshine', 'Happy', 'Lovely Day'],
-    sad: ['Hallelujah', 'Tears in Heaven', 'Someone Like You'],
-    energetic: ['Uptown Funk', 'September', 'Don\'t Stop Me Now'],
-    calm: ['Watermark', 'Clair de Lune', 'A Sky Full of Stars'],
-    romantic: ['Perfect', 'All of Me', 'Can\'t Help Falling in Love'],
-  };
-
-  const mood = input.mood.toLowerCase();
-  return songMap[mood] || ['Default Song 1', 'Default Song 2', 'Default Song 3'];
-});
-
-const suggestSongsForMoodPrompt = ai.definePrompt({
-  name: 'suggestSongsForMoodPrompt',
-  tools: [getSongsForMood],
-  input: {schema: SuggestSongsForMoodInputSchema},
-  output: {schema: SuggestSongsForMoodOutputSchema},
-  prompt: `Based on the user's mood, suggest a list of songs using the getSongsForMood tool.
-
-Mood: {{{mood}}}
-`,
-});
-
 const suggestSongsForMoodFlow = ai.defineFlow(
   {
     name: 'suggestSongsForMoodFlow',
     inputSchema: SuggestSongsForMoodInputSchema,
     outputSchema: SuggestSongsForMoodOutputSchema,
   },
-  async input => {
-    const {output} = await suggestSongsForMoodPrompt(input);
-    return output!;
+  async (input) => {
+    const songMap: { [key: string]: string[] } = {
+      happy: ['Walking on Sunshine', 'Happy', 'Lovely Day'],
+      sad: ['Hallelujah', 'Tears in Heaven', 'Someone Like You'],
+      energetic: ['Uptown Funk', 'September', 'Don\'t Stop Me Now'],
+      calm: ['Watermark', 'Clair de Lune', 'A Sky Full of Stars'],
+      romantic: ['Perfect', 'All of Me', 'Can\'t Help Falling in Love'],
+    };
+
+    const mood = input.mood.toLowerCase();
+    const songs = songMap[mood] || ['Default Song 1', 'Default Song 2', 'Default Song 3'];
+
+    return { songs };
   }
 );
