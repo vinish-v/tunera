@@ -12,10 +12,11 @@ interface MoodCardShareProps extends React.HTMLAttributes<HTMLDivElement> {
     emoji: string;
     mood: string;
     song?: Song;
+    imageUrl?: string;
 }
 
 export const MoodCardShare = React.forwardRef<HTMLDivElement, MoodCardShareProps>(
-    ({ selfieDataUri, emoji, mood, song, className, ...props }, ref) => {
+    ({ selfieDataUri, emoji, mood, song, imageUrl, className, ...props }, ref) => {
         return (
             <div ref={ref} className={cn("relative aspect-[9/16] w-full max-w-[300px] mx-auto overflow-hidden rounded-lg bg-card", className)} {...props}>
                 {selfieDataUri && (
@@ -36,9 +37,19 @@ export const MoodCardShare = React.forwardRef<HTMLDivElement, MoodCardShareProps
                     {song ? (
                         <div className="text-left">
                             <div className="flex items-center gap-3 bg-white/20 backdrop-blur-md p-3 rounded-lg">
-                                <div className="w-12 h-12 bg-white/30 rounded-md flex items-center justify-center flex-shrink-0">
-                                    <Music className="w-6 h-6" />
-                                </div>
+                                {imageUrl ? (
+                                    <Image
+                                        src={imageUrl}
+                                        alt={`Album art for ${song.title}`}
+                                        width={48}
+                                        height={48}
+                                        className="w-12 h-12 rounded-md flex-shrink-0 object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-12 h-12 bg-white/30 rounded-md flex items-center justify-center flex-shrink-0">
+                                        <Music className="w-6 h-6" />
+                                    </div>
+                                )}
                                 <div className="overflow-hidden">
                                     <p className="font-semibold truncate">{song.title}</p>
                                     <p className="text-sm opacity-80 truncate">{song.artist}</p>

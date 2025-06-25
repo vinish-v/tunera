@@ -1,8 +1,7 @@
-
 "use client";
 
 import Image from 'next/image';
-import { Music, Heart, Share2, Download, Loader2, Copy } from 'lucide-react';
+import { Music, Heart, Share2, Download } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Skeleton } from './ui/skeleton';
@@ -50,12 +49,15 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
 
   useEffect(() => {
     if (typeof window !== 'undefined' && navigator.share) {
-        const dummyFile = new File([""], "dummy.png", { type: "image/png" });
-        if (navigator.canShare?.({ files: [dummyFile] })) {
+        if (navigator.canShare?.({ files: [new File([], 'dummy.png', { type: 'image/png' })] })) {
             setCanShareNatively(true);
         }
     }
   }, []);
+
+  const songTitle = track?.name ?? song.title;
+  const artistName = track?.artists.map(a => a.name).join(', ') ?? song.artist;
+  const imageUrl = track?.album.images[0]?.url;
 
   const handleDownload = useCallback(async () => {
     if (!moodCardRef.current) return;
@@ -77,38 +79,47 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         setShareState('idle');
     }
   }, [song.title, toast]);
-
+  
   const handleShare = useCallback(async () => {
-    if (!moodCardRef.current || !canShareNatively) return;
-    setShareState('sharing');
-    try {
-        const blob = await toBlob(moodCardRef.current, { quality: 0.95, pixelRatio: 2 });
-        if (!blob) {
-            throw new Error('Failed to create image blob.');
-        }
+    if (!moodCardRef.current) return;
 
-        const file = new File([blob], `camood-vibe-${song.title}.png`, { type: 'image/png' });
+    if (canShareNatively) {
+        setShareState('sharing');
+        try {
+            const blob = await toBlob(moodCardRef.current, { quality: 0.95, pixelRatio: 2 });
+            if (!blob) {
+                throw new Error('Failed to create image blob.');
+            }
 
-        await navigator.share({
-            files: [file],
-            title: 'My Camood Vibe',
-            text: `Feeling ${moodResult?.mood || 'great'}! Check out the vibe I just captured with Camood.`,
-        });
+            const file = new File([blob], `camood-vibe-${song.title}.png`, { type: 'image/png' });
 
-    } catch (error) {
-        if ((error as DOMException).name !== 'AbortError') {
-            console.error('Sharing failed', error);
-            toast({
-                title: 'Sharing failed',
-                description: 'Something went wrong while trying to share.',
-                variant: 'destructive',
+            await navigator.share({
+                files: [file],
+                title: 'My Camood Vibe',
+                text: `Feeling ${moodResult?.mood || 'great'}! Check out the vibe I just captured with Camood.`,
             });
+            setIsShareOpen(false); // Close dialog on successful share
+        } catch (error) {
+            if ((error as DOMException).name !== 'AbortError') {
+                console.error('Sharing failed', error);
+                toast({
+                    title: 'Sharing failed',
+                    description: 'Could not share the image. You can try downloading it instead.',
+                    variant: 'destructive',
+                });
+            }
+        } finally {
+            setShareState('idle');
         }
-    } finally {
-        setShareState('idle');
-        setIsShareOpen(false);
+    } else {
+        toast({
+            title: "Sharing not supported",
+            description: "Your browser doesn't support direct sharing. Downloading the image instead.",
+        });
+        await handleDownload();
     }
-  }, [song.title, toast, canShareNatively, moodResult?.mood]);
+  }, [song.title, toast, canShareNatively, moodResult?.mood, handleDownload]);
+
 
   useEffect(() => {
     if (initialTrack) {
@@ -146,10 +157,6 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
 
     fetchTrack();
   }, [song, initialTrack]);
-
-  const songTitle = track?.name ?? song.title;
-  const artistName = track?.artists.map(a => a.name).join(', ') ?? song.artist;
-  const imageUrl = track?.album.images[0]?.url;
 
   const isFav = track ? isFavourite(track.id) : false;
 
@@ -193,7 +200,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !initialTrack) {
     return <SongCardSkeleton />;
   }
 
@@ -210,7 +217,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
                 alt={`Album art for ${songTitle}`} 
                 width={64} 
                 height={64} 
-                className="rounded-md"
+                className="rounded-md object-cover"
               />
             ) : (
               <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
@@ -221,39 +228,37 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
               <p className="font-bold truncate" title={songTitle}>{songTitle}</p>
               <p className="text-sm text-muted-foreground truncate" title={artistName}>{artistName}</p>
             </div>
-            {isLoaded && (
-              <div className="flex items-center shrink-0">
+            <div className="flex items-center shrink-0">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full h-9 w-9"
+                    onClick={handleFavouriteClick}
+                    title={track ? (isFav ? 'Remove from Favourites' : 'Add to Favourites') : "Cannot favourite track (Spotify API unavailable)"}
+                    disabled={!track || !isLoaded}
+                >
+                    <Heart className={cn("h-5 w-5", isFav ? "fill-red-500 text-red-500" : "text-muted-foreground")} />
+                    <span className="sr-only">Favourite</span>
+                </Button>
+                {selfieDataUri && moodResult && (
                   <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full h-9 w-9"
-                      onClick={handleFavouriteClick}
-                      title={track ? (isFav ? 'Remove from Favourites' : 'Add to Favourites') : "Cannot favourite track (Spotify API unavailable)"}
-                      disabled={!track}
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full h-9 w-9"
+                    onClick={handleShareClick}
+                    title="Share Vibe"
                   >
-                      <Heart className={cn("h-5 w-5", isFav ? "fill-red-500 text-red-500" : "text-muted-foreground")} />
-                      <span className="sr-only">Favourite</span>
+                    <Share2 className="h-5 w-5 text-muted-foreground" />
+                    <span className="sr-only">Share Vibe</span>
                   </Button>
-                  {selfieDataUri && moodResult && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full h-9 w-9"
-                      onClick={handleShareClick}
-                      title="Share Vibe"
-                    >
-                      <Share2 className="h-5 w-5 text-muted-foreground" />
-                      <span className="sr-only">Share Vibe</span>
-                    </Button>
-                  )}
-              </div>
-            )}
+                )}
+            </div>
         </CardContent>
       </Card>
       
       {selfieDataUri && moodResult && (
         <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
-          <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>Share Your Vibe</DialogTitle>
               <DialogDescription>Share this mood card with your friends.</DialogDescription>
@@ -265,14 +270,14 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
                   mood={moodResult.mood}
                   emoji={moodResult.emoji}
                   song={song}
+                  imageUrl={imageUrl}
               />
             </div>
-            <DialogFooter className="grid grid-cols-2 gap-2 pt-4">
+            <DialogFooter className="grid grid-cols-2 gap-2">
                 <Button 
                     onClick={handleShare} 
-                    disabled={shareState !== 'idle' || !canShareNatively} 
-                    className="w-full" 
-                    title={!canShareNatively ? "Your browser doesn't support direct image sharing." : "Share this vibe"}
+                    disabled={shareState !== 'idle'} 
+                    className="w-full"
                 >
                     <Share2 className="mr-2 h-4 w-4" />
                     {shareState === 'sharing' ? 'Sharing...' : 'Share'}
