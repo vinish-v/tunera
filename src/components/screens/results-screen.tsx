@@ -1,6 +1,5 @@
 "use client";
 
-import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -38,10 +37,10 @@ export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected }: { mo
         <div className="pt-4 flex justify-center">
             {!isSpotifyConnected ? (
               <Button asChild>
-                <Link href="/api/auth/spotify/login">
+                <a href="/api/auth/spotify/login">
                   <SpotifyIcon className="w-5 h-5 mr-2" />
                   Connect to Spotify
-                </Link>
+                </a>
               </Button>
             ) : (
                 <div className='flex flex-col items-center gap-2'>
@@ -50,7 +49,7 @@ export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected }: { mo
                         Connected to Spotify
                     </p>
                     <Button variant="outline" size="sm" asChild>
-                        <Link href="/api/auth/spotify/logout">Disconnect</Link>
+                        <a href="/api/auth/spotify/logout">Disconnect</a>
                     </Button>
                 </div>
             )}
