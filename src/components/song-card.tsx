@@ -43,17 +43,8 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
   const { addFavourite, removeFavourite, isFavourite, isLoaded } = useFavourites();
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareState, setShareState] = useState<'idle' | 'sharing' | 'downloading'>('idle');
-  const [canShareNatively, setCanShareNatively] = useState(false);
   const moodCardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && navigator.share) {
-        if (navigator.canShare?.({ files: [new File([], 'dummy.png', { type: 'image/png' })] })) {
-            setCanShareNatively(true);
-        }
-    }
-  }, []);
 
   const songTitle = track?.name ?? song.title;
   const artistName = track?.artists.map(a => a.name).join(', ') ?? song.artist;
@@ -77,13 +68,14 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         });
     } finally {
         setShareState('idle');
+        setIsShareOpen(false);
     }
   }, [song.title, toast]);
   
   const handleShare = useCallback(async () => {
     if (!moodCardRef.current) return;
 
-    if (canShareNatively) {
+    if (navigator.share) {
         setShareState('sharing');
         try {
             const blob = await toBlob(moodCardRef.current, { quality: 0.95, pixelRatio: 2 });
@@ -103,10 +95,10 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
             if ((error as DOMException).name !== 'AbortError') {
                 console.error('Sharing failed', error);
                 toast({
-                    title: 'Sharing failed',
-                    description: 'Could not share the image. You can try downloading it instead.',
-                    variant: 'destructive',
+                    title: 'Sharing not supported on this browser',
+                    description: 'Your browser doesn\'t support direct sharing. Downloading the image instead.',
                 });
+                await handleDownload();
             }
         } finally {
             setShareState('idle');
@@ -118,8 +110,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         });
         await handleDownload();
     }
-  }, [song.title, toast, canShareNatively, moodResult?.mood, handleDownload]);
-
+  }, [song.title, toast, moodResult?.mood, handleDownload]);
 
   useEffect(() => {
     if (initialTrack) {
@@ -263,7 +254,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
               <DialogTitle>Share Your Vibe</DialogTitle>
               <DialogDescription>Share this mood card with your friends.</DialogDescription>
             </DialogHeader>
-            <div className="py-4">
+            <div className="py-4 overflow-y-auto">
               <MoodCardShare
                   ref={moodCardRef}
                   selfieDataUri={selfieDataUri}
