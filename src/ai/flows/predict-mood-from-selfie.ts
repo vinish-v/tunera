@@ -21,10 +21,10 @@ const PredictMoodFromSelfieInputSchema = z.object({
 export type PredictMoodFromSelfieInput = z.infer<typeof PredictMoodFromSelfieInputSchema>;
 
 // Define the moods we have playlists for.
-const MoodEnum = z.enum(['happy', 'sad', 'energetic', 'calm', 'romantic', 'fear', 'anger', 'surprise', 'disgust']);
+const MoodEnum = z.enum(['happy', 'sad', 'energetic', 'calm', 'surprise']);
 
 const PredictMoodFromSelfieOutputSchema = z.object({
-  mood: MoodEnum.describe('The predicted mood from the selfie. Must be one of happy, sad, energetic, calm, romantic, fear, anger, surprise, or disgust.'),
+  mood: MoodEnum.describe('The predicted mood from the selfie. Must be one of happy, sad, energetic, calm, or surprise.'),
   emoji: z.string().describe('A single emoji that represents the mood.'),
 });
 export type PredictMoodFromSelfieOutput = z.infer<typeof PredictMoodFromSelfieOutputSchema>;
@@ -39,7 +39,7 @@ const prompt = ai.definePrompt({
   output: {schema: PredictMoodFromSelfieOutputSchema},
   prompt: `You are a mood analysis expert. Analyze the user's selfie and determine their mood.
 
-You MUST classify the mood into one of the following categories: happy, sad, energetic, calm, romantic, fear, anger, surprise, disgust.
+You MUST classify the mood into one of the following categories: happy, sad, energetic, calm, surprise.
 
 You MUST also provide a single emoji character that represents the predicted mood.
 
@@ -56,6 +56,9 @@ const predictMoodFromSelfieFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("Failed to get a mood prediction from the AI.");
+    }
+    return output;
   }
 );
