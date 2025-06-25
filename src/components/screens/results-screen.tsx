@@ -46,7 +46,7 @@ export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRef
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4 sm:p-6 pt-0">
-        <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div className="flex items-center gap-2">
                 <Languages className="w-5 h-5 text-muted-foreground" />
                 <Select onValueChange={onLanguageChange} defaultValue={language}>
@@ -93,7 +93,7 @@ export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRef
         </ScrollArea>
       </CardContent>
       <CardFooter className="flex flex-col gap-2 pt-6">
-        <div className="grid grid-cols-2 gap-2 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
             <Button onClick={onReset} variant="outline" className="w-full">
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Try Again

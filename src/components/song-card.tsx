@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from 'next/image';
@@ -222,7 +221,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         onClick={handleCardClick}
         className="bg-background/50 group hover:bg-accent/50 hover:shadow-md transition-all duration-300 cursor-pointer"
       >
-        <CardContent className="p-3 flex items-center gap-4">
+        <CardContent className="p-3 flex items-center gap-3">
             {imageUrl ? (
               <Image 
                 src={imageUrl} 
