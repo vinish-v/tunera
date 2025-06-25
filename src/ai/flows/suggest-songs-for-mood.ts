@@ -38,6 +38,9 @@ const prompt = ai.definePrompt({
     name: 'suggestSongsPrompt',
     input: {schema: SuggestSongsForMoodInputSchema},
     output: {schema: SuggestSongsForMoodOutputSchema},
+    config: {
+        temperature: 1.0,
+    },
     prompt: `You are a music expert and world-class DJ. Your task is to suggest 8 songs that embody the provided mood.
 
 The mood is: {{{mood}}}.
