@@ -49,9 +49,14 @@ export function SongCard({ song, streamingPlatform, initialTrack }: { song: Song
         const response = await fetch(`/api/spotify/search?${searchQuery.toString()}`);
         if (response.ok) {
           const data = await response.json();
-          setTrack(data);
+          if (data && !data.error) {
+            setTrack(data);
+          } else {
+            console.error('Failed to fetch track from spotify:', data.error);
+            setTrack(null);
+          }
         } else {
-          console.error('Failed to fetch track from spotify');
+          console.error('Failed to fetch track from spotify, status:', response.status);
           setTrack(null);
         }
       } catch (error) {
@@ -124,7 +129,7 @@ export function SongCard({ song, streamingPlatform, initialTrack }: { song: Song
               className="rounded-md"
             />
           ) : (
-            <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center">
+            <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
                <Music className="w-8 h-8 text-muted-foreground" />
             </div>
           )}

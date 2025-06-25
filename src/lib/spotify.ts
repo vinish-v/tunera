@@ -1,7 +1,8 @@
+
 import SpotifyWebApi from 'spotify-web-api-node';
 
-if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET || !process.env.NEXT_PUBLIC_APP_URL) {
-    throw new Error("Missing Spotify credentials in .env file");
+if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
+    console.warn("Missing Spotify credentials in .env file. Spotify features may not work.");
 }
 
 const spotifyApi = new SpotifyWebApi({
