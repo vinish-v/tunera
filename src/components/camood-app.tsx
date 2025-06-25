@@ -20,6 +20,7 @@ export default function TuneraApp() {
   const [moodResult, setMoodResult] = useState<{ mood: string; emoji: string } | null>(null);
   const [selfieDataUri, setSelfieDataUri] = useState<string | null>(null);
   const [songs, setSongs] = useState<Song[]>([]);
+  const [songHistory, setSongHistory] = useState<Song[]>([]);
   const [isSuggestingSongs, setIsSuggestingSongs] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [language, setLanguage] = useState('English');
@@ -48,13 +49,14 @@ export default function TuneraApp() {
       setMoodResult({ mood: predictedMood, emoji: predictedEmoji });
 
       setLoadingMessage('Finding your perfect playlist...');
-      const { songs: suggestedSongs } = await suggestSongsForMood({ mood: predictedMood, language });
+      const { songs: suggestedSongs } = await suggestSongsForMood({ mood: predictedMood, language, history: [] });
       
       if (!suggestedSongs || suggestedSongs.length === 0) {
         throw new Error("Song suggestion returned empty.");
       }
       
       setSongs(suggestedSongs);
+      setSongHistory(suggestedSongs);
       setRefreshKey(Date.now());
 
       setStep('results');
@@ -75,13 +77,24 @@ export default function TuneraApp() {
     setIsSuggestingSongs(true);
     try {
       const langToUse = newLanguage || language;
-      const { songs: suggestedSongs } = await suggestSongsForMood({ mood: moodResult.mood, language: langToUse });
+      
+      let historyToSend = [...songHistory];
+      if (historyToSend.length >= 100) {
+        historyToSend = []; // Reset history after 100 songs
+        toast({
+            title: "Playlist Refreshed",
+            description: "You've explored over 100 songs! Starting a fresh set of recommendations.",
+        });
+      }
+
+      const { songs: suggestedSongs } = await suggestSongsForMood({ mood: moodResult.mood, language: langToUse, history: historyToSend });
 
       if (!suggestedSongs || suggestedSongs.length === 0) {
         throw new Error("Song suggestion returned empty.");
       }
 
       setSongs(suggestedSongs);
+      setSongHistory(currentHistory => [...historyToSend, ...suggestedSongs]);
       setRefreshKey(Date.now());
     } catch (error) {
       console.error("Failed to refresh songs", error);
@@ -105,6 +118,7 @@ export default function TuneraApp() {
     setMoodResult(null);
     setSelfieDataUri(null);
     setSongs([]);
+    setSongHistory([]);
     setLoadingMessage('');
     setLanguage('English');
   };
