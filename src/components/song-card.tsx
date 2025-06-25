@@ -75,7 +75,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         if (!blob) throw new Error("Could not create image blob.");
 
         const link = document.createElement('a');
-        link.download = `camood-vibe-${song.title}.png`;
+        link.download = `camood-vibe-${songTitle}.png`;
         link.href = URL.createObjectURL(blob);
         link.click();
         URL.revokeObjectURL(link.href);
@@ -89,9 +89,8 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         });
     } finally {
         setShareState('idle');
-        setIsShareOpen(false);
     }
-  }, [song.title, toast]);
+  }, [songTitle, toast]);
   
   const handleShare = useCallback(async () => {
     if (!moodCardRef.current || !canShare) return;
@@ -103,7 +102,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
             throw new Error('Failed to create image blob.');
         }
 
-        const file = new File([blob], `camood-vibe-${song.title}.png`, { type: 'image/png' });
+        const file = new File([blob], `camood-vibe-${songTitle}.png`, { type: 'image/png' });
 
         await navigator.share({
             files: [file],
@@ -121,9 +120,17 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         }
     } finally {
         setShareState('idle');
-        setIsShareOpen(false);
     }
-  }, [song.title, toast, moodResult?.mood, canShare]);
+  }, [songTitle, toast, moodResult?.mood, canShare]);
+
+  const handleClick = useCallback(() => {
+    if (canShare) {
+        handleShare();
+    } else {
+        handleDownload();
+    }
+  }, [canShare, handleShare, handleDownload]);
+
 
   useEffect(() => {
     if (initialTrack) {
@@ -180,7 +187,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
     setIsShareOpen(true);
   };
 
-  const handleClick = () => {
+  const handleCardClick = () => {
     const query = encodeURIComponent(`${song.title} ${song.artist}`);
     let url: string | undefined;
 
@@ -211,7 +218,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
   return (
     <>
       <Card 
-        onClick={handleClick}
+        onClick={handleCardClick}
         className="bg-background/50 group hover:bg-accent/50 hover:shadow-md transition-all duration-300 cursor-pointer"
       >
         <CardContent className="p-3 flex items-center gap-4">
@@ -263,7 +270,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
       {selfieDataUri && moodResult && (
         <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
           <DialogContent className="max-h-[90svh] flex flex-col">
-            <DialogHeader>
+            <DialogHeader className="sr-only">
               <DialogTitle>Share Your Vibe</DialogTitle>
               <DialogDescription>Share this mood card with your friends.</DialogDescription>
             </DialogHeader>
@@ -273,21 +280,17 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
                   selfieDataUri={selfieDataUri}
                   mood={moodResult.mood}
                   emoji={moodResult.emoji}
-                  song={song}
+                  song={{title: songTitle, artist: artistName}}
                   imageUrl={imageUrl}
               />
             </div>
-            <DialogFooter className="mt-auto pt-4">
+            <DialogFooter className="mt-auto pt-4 flex-col sm:flex-col sm:justify-center gap-2">
                 <Button 
-                    onClick={canShare ? handleShare : handleDownload} 
+                    onClick={handleClick} 
                     disabled={shareState !== 'idle'} 
                     className="w-full"
                 >
-                    {canShare ? (
-                        <Share2 className="mr-2 h-4 w-4" />
-                    ) : (
-                        <Download className="mr-2 h-4 w-4" />
-                    )}
+                    {(canShare) ? <Share2 className="mr-2 h-4 w-4" /> : <Download className="mr-2 h-4 w-4" />}
                     
                     {shareState === 'idle' && (canShare ? 'Share' : 'Download to Share')}
                     {shareState === 'sharing' && 'Sharing...'}
@@ -300,3 +303,5 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
     </>
   );
 }
+
+    
