@@ -28,11 +28,6 @@ export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyCo
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!isSpotifyConnected) {
-      setIsLoading(false);
-      return;
-    }
-
     const fetchTrack = async () => {
       setIsLoading(true);
       try {
@@ -56,7 +51,7 @@ export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyCo
     };
 
     fetchTrack();
-  }, [song, isSpotifyConnected]);
+  }, [song]);
 
   const songTitle = track?.name ?? song.title;
   const artistName = track?.artists.map(a => a.name).join(', ') ?? song.artist;
@@ -76,7 +71,7 @@ export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyCo
     }
   };
 
-  if (isLoading && isSpotifyConnected) {
+  if (isLoading) {
     return <SongCardSkeleton />;
   }
 

@@ -2,14 +2,48 @@ import { NextRequest, NextResponse } from 'next/server';
 import spotifyApi from '@/lib/spotify';
 import { cookies } from 'next/headers';
 
-export async function GET(req: NextRequest) {
-  const accessToken = cookies().get('spotify_access_token')?.value;
+// In-memory cache for the application's access token
+let appAccessToken: {
+  token: string | null;
+  expiresAt: number | null;
+} = {
+  token: null,
+  expiresAt: null,
+};
 
-  if (!accessToken) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+async function getAppAccessToken() {
+  if (appAccessToken.token && appAccessToken.expiresAt && Date.now() < appAccessToken.expiresAt) {
+    return appAccessToken.token;
   }
 
-  spotifyApi.setAccessToken(accessToken);
+  try {
+    const data = await spotifyApi.clientCredentialsGrant();
+    appAccessToken = {
+      token: data.body['access_token'],
+      // Set expiry to be 1 minute before actual expiry to be safe
+      expiresAt: Date.now() + (data.body['expires_in'] * 1000) - 60000,
+    };
+    return appAccessToken.token;
+  } catch (error) {
+    console.error('Spotify client credentials grant error', error);
+    appAccessToken.token = null; // Reset token on error
+    return null;
+  }
+}
+
+export async function GET(req: NextRequest) {
+  const userAccessToken = cookies().get('spotify_access_token')?.value;
+  let activeToken = userAccessToken;
+
+  if (!activeToken) {
+    activeToken = await getAppAccessToken();
+  }
+
+  if (!activeToken) {
+    return NextResponse.json({ error: 'Could not authenticate with Spotify' }, { status: 401 });
+  }
+
+  spotifyApi.setAccessToken(activeToken);
 
   const { searchParams } = new URL(req.url);
   const query = searchParams.get('query');
@@ -44,9 +78,10 @@ export async function GET(req: NextRequest) {
 
   } catch (error) {
     console.error('Spotify search error', error);
-    // This could be a 401 if token expired. A real app would handle token refresh here.
     if ((error as any).statusCode === 401) {
-        return NextResponse.json({ error: 'Spotify token expired' }, { status: 401 });
+        // Token is invalid. If it was an app token, it will be refreshed on the next request.
+        // If it was a user token, they need to re-authenticate.
+        return NextResponse.json({ error: 'Spotify token expired or invalid' }, { status: 401 });
     }
     return NextResponse.json({ error: 'Failed to search on Spotify' }, { status: 500 });
   }
