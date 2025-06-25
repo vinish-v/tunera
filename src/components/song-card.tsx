@@ -235,7 +235,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
                   <Music className="w-8 h-8 text-muted-foreground" />
               </div>
             )}
-            <div className="flex-grow overflow-hidden">
+            <div className="flex-grow overflow-hidden min-w-0">
               <p className="font-bold truncate" title={songTitle}>{songTitle}</p>
               <p className="text-sm text-muted-foreground truncate" title={artistName}>{artistName}</p>
             </div>
