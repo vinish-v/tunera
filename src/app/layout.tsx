@@ -5,6 +5,10 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Camood',
   description: 'Find music that matches your mood.',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+  },
 };
 
 export default function RootLayout({

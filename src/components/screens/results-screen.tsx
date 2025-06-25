@@ -23,8 +23,8 @@ export const ResultsScreen = ({ mood, songs, onReset }: { mood: string; songs: s
   return (
     <Card className="shadow-2xl animate-in fade-in zoom-in-95 duration-500 w-full">
       <CardHeader>
-        <CardTitle className="text-center font-headline text-3xl flex items-center justify-center gap-2">
-            <Sparkles className="w-8 h-8 text-primary"/>
+        <CardTitle className="text-center font-headline text-2xl sm:text-3xl flex items-center justify-center gap-2">
+            <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-primary"/>
             Your Vibe is: {mood}
         </CardTitle>
         <CardDescription className="text-center pt-2">Here are some tracks we think you'll like. Connect to Spotify to listen.</CardDescription>
@@ -36,7 +36,7 @@ export const ResultsScreen = ({ mood, songs, onReset }: { mood: string; songs: s
         </div>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-72 pr-4">
+        <ScrollArea className="h-64 sm:h-72 pr-4">
             <div className="space-y-2">
                 {songs.map((song, index) => (
                     <SongCard key={index} songTitle={song} />
