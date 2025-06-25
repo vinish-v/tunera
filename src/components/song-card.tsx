@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { MoodCardShare } from "./mood-card-share";
 import { toBlob, toPng } from 'html-to-image';
 import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 
 type Song = { title: string; artist: string };
@@ -45,10 +46,29 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
   const [shareState, setShareState] = useState<'idle' | 'sharing' | 'downloading'>('idle');
   const moodCardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [canShare, setCanShare] = useState(false);
 
   const songTitle = track?.name ?? song.title;
   const artistName = track?.artists.map(a => a.name).join(', ') ?? song.artist;
   const imageUrl = track?.album.images[0]?.url;
+
+  useEffect(() => {
+    if (isShareOpen) {
+      // Check if the Web Share API is supported for files
+      const checkSharing = async () => {
+        if (navigator.share && navigator.canShare) {
+          // We need a dummy file to check if file sharing is supported.
+          const dummyFile = new File([new Blob()], "test.png", { type: "image/png" });
+          if (navigator.canShare({ files: [dummyFile] })) {
+            setCanShare(true);
+            return;
+          }
+        }
+        setCanShare(false);
+      };
+      checkSharing();
+    }
+  }, [isShareOpen]);
 
   const handleDownload = useCallback(async () => {
     if (!moodCardRef.current) return;
@@ -73,44 +93,37 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
   }, [song.title, toast]);
   
   const handleShare = useCallback(async () => {
-    if (!moodCardRef.current) return;
+    if (!moodCardRef.current || !canShare) return;
 
-    if (navigator.share) {
-        setShareState('sharing');
-        try {
-            const blob = await toBlob(moodCardRef.current, { quality: 0.95, pixelRatio: 2 });
-            if (!blob) {
-                throw new Error('Failed to create image blob.');
-            }
-
-            const file = new File([blob], `camood-vibe-${song.title}.png`, { type: 'image/png' });
-
-            await navigator.share({
-                files: [file],
-                title: 'My Camood Vibe',
-                text: `Feeling ${moodResult?.mood || 'great'}! Check out the vibe I just captured with Camood.`,
-            });
-            setIsShareOpen(false); // Close dialog on successful share
-        } catch (error) {
-            if ((error as DOMException).name !== 'AbortError') {
-                console.error('Sharing failed', error);
-                toast({
-                    title: 'Sharing not supported on this browser',
-                    description: 'Your browser doesn\'t support direct sharing. Downloading the image instead.',
-                });
-                await handleDownload();
-            }
-        } finally {
-            setShareState('idle');
+    setShareState('sharing');
+    try {
+        const blob = await toBlob(moodCardRef.current, { quality: 0.95, pixelRatio: 2 });
+        if (!blob) {
+            throw new Error('Failed to create image blob.');
         }
-    } else {
-        toast({
-            title: "Sharing not supported",
-            description: "Your browser doesn't support direct sharing. Downloading the image instead.",
+
+        const file = new File([blob], `camood-vibe-${song.title}.png`, { type: 'image/png' });
+
+        await navigator.share({
+            files: [file],
+            title: 'My Camood Vibe',
+            text: `Feeling ${moodResult?.mood || 'great'}! Check out the vibe I just captured with Camood.`,
         });
-        await handleDownload();
+        setIsShareOpen(false);
+    } catch (error) {
+        // We only show an error if it's not an AbortError (user cancelled the share)
+        if ((error as DOMException).name !== 'AbortError') {
+            console.error('Sharing failed', error);
+            toast({
+                title: 'Sharing Failed',
+                description: 'Could not share the image. Please try downloading it instead.',
+                variant: 'destructive',
+            });
+        }
+    } finally {
+        setShareState('idle');
     }
-  }, [song.title, toast, moodResult?.mood, handleDownload]);
+  }, [song.title, toast, moodResult?.mood, canShare]);
 
   useEffect(() => {
     if (initialTrack) {
@@ -249,7 +262,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
       
       {selfieDataUri && moodResult && (
         <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
-          <DialogContent>
+          <DialogContent className="max-h-[90svh] flex flex-col">
             <DialogHeader>
               <DialogTitle>Share Your Vibe</DialogTitle>
               <DialogDescription>Share this mood card with your friends.</DialogDescription>
@@ -264,15 +277,29 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
                   imageUrl={imageUrl}
               />
             </div>
-            <DialogFooter className="grid grid-cols-2 gap-2">
-                <Button 
-                    onClick={handleShare} 
-                    disabled={shareState !== 'idle'} 
-                    className="w-full"
-                >
-                    <Share2 className="mr-2 h-4 w-4" />
-                    {shareState === 'sharing' ? 'Sharing...' : 'Share'}
-                </Button>
+            <DialogFooter className="grid grid-cols-2 gap-2 mt-auto pt-4">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      {/* The button needs to be wrapped for the tooltip to work on a disabled button */}
+                      <span tabIndex={0} className="w-full">
+                        <Button 
+                            onClick={handleShare} 
+                            disabled={!canShare || shareState !== 'idle'} 
+                            className="w-full"
+                        >
+                            <Share2 className="mr-2 h-4 w-4" />
+                            {shareState === 'sharing' ? 'Sharing...' : 'Share'}
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    {!canShare && (
+                      <TooltipContent>
+                        <p>Direct sharing isn't supported on this browser/device.</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
                 
                 <Button 
                     onClick={handleDownload} 
