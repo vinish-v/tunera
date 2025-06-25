@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -10,10 +11,8 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { MoodCardShare } from "./mood-card-share";
-import { toBlob, toPng } from 'html-to-image';
+import { toBlob } from 'html-to-image';
 import { useToast } from "@/hooks/use-toast";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-
 
 type Song = { title: string; artist: string };
 type MoodResult = { mood: string; emoji: string };
@@ -54,10 +53,8 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
 
   useEffect(() => {
     if (isShareOpen) {
-      // Check if the Web Share API is supported for files
       const checkSharing = async () => {
         if (navigator.share && navigator.canShare) {
-          // We need a dummy file to check if file sharing is supported.
           const dummyFile = new File([new Blob()], "test.png", { type: "image/png" });
           if (navigator.canShare({ files: [dummyFile] })) {
             setCanShare(true);
@@ -74,11 +71,15 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
     if (!moodCardRef.current) return;
     setShareState('downloading');
     try {
-        const dataUrl = await toPng(moodCardRef.current, { quality: 0.95, pixelRatio: 2 });
+        const blob = await toBlob(moodCardRef.current, { quality: 0.95, pixelRatio: 2 });
+        if (!blob) throw new Error("Could not create image blob.");
+
         const link = document.createElement('a');
         link.download = `camood-vibe-${song.title}.png`;
-        link.href = dataUrl;
+        link.href = URL.createObjectURL(blob);
         link.click();
+        URL.revokeObjectURL(link.href);
+
     } catch (error) {
         console.error('Download failed', error);
         toast({
@@ -109,9 +110,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
             title: 'My Camood Vibe',
             text: `Feeling ${moodResult?.mood || 'great'}! Check out the vibe I just captured with Camood.`,
         });
-        setIsShareOpen(false);
     } catch (error) {
-        // We only show an error if it's not an AbortError (user cancelled the share)
         if ((error as DOMException).name !== 'AbortError') {
             console.error('Sharing failed', error);
             toast({
@@ -122,6 +121,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         }
     } finally {
         setShareState('idle');
+        setIsShareOpen(false);
     }
   }, [song.title, toast, moodResult?.mood, canShare]);
 
@@ -277,38 +277,21 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
                   imageUrl={imageUrl}
               />
             </div>
-            <DialogFooter className="grid grid-cols-2 gap-2 mt-auto pt-4">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      {/* The button needs to be wrapped for the tooltip to work on a disabled button */}
-                      <span tabIndex={0} className="w-full">
-                        <Button 
-                            onClick={handleShare} 
-                            disabled={!canShare || shareState !== 'idle'} 
-                            className="w-full"
-                        >
-                            <Share2 className="mr-2 h-4 w-4" />
-                            {shareState === 'sharing' ? 'Sharing...' : 'Share'}
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    {!canShare && (
-                      <TooltipContent>
-                        <p>Direct sharing isn't supported on this browser/device.</p>
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
-                </TooltipProvider>
-                
+            <DialogFooter className="mt-auto pt-4">
                 <Button 
-                    onClick={handleDownload} 
+                    onClick={canShare ? handleShare : handleDownload} 
                     disabled={shareState !== 'idle'} 
-                    className="w-full" 
-                    variant="outline"
+                    className="w-full"
                 >
-                    <Download className="mr-2 h-4 w-4" />
-                    {shareState === 'downloading' ? 'Downloading...' : 'Download'}
+                    {canShare ? (
+                        <Share2 className="mr-2 h-4 w-4" />
+                    ) : (
+                        <Download className="mr-2 h-4 w-4" />
+                    )}
+                    
+                    {shareState === 'idle' && (canShare ? 'Share' : 'Download to Share')}
+                    {shareState === 'sharing' && 'Sharing...'}
+                    {shareState === 'downloading' && 'Downloading...'}
                 </Button>
             </DialogFooter>
           </DialogContent>
