@@ -5,12 +5,14 @@ import { Play, Music } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
+import { useToast } from "@/hooks/use-toast";
 
 type Song = { title: string; artist: string };
 
 export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyConnected: boolean }) {
   const [track, setTrack] = useState<SpotifyApi.SingleTrackResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!isSpotifyConnected) {
@@ -48,6 +50,19 @@ export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyCo
   const imageUrl = track?.album.images[0]?.url;
   const trackUrl = track?.external_urls.spotify;
 
+  const handleClick = () => {
+    if (isSpotifyConnected) {
+      if (trackUrl) {
+        window.open(trackUrl, '_blank', 'noopener,noreferrer');
+      }
+    } else {
+      toast({
+        title: "Connect to Spotify",
+        description: "Please connect your Spotify account to listen to this song.",
+      });
+    }
+  };
+
   if (isLoading && isSpotifyConnected) {
     return (
         <Card>
@@ -65,46 +80,35 @@ export function SongCard({ song, isSpotifyConnected }: { song: Song; isSpotifyCo
     );
   }
 
-  const cardInnerContent = (
-    <CardContent className="p-3 flex items-center gap-4">
-        {imageUrl ? (
-          <Image 
-            src={imageUrl} 
-            alt={`Album art for ${songTitle}`} 
-            width={64} 
-            height={64} 
-            className="rounded-md"
-          />
-        ) : (
-          <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center">
-             <Music className="w-8 h-8 text-muted-foreground" />
-          </div>
-        )}
-        <div className="flex-grow overflow-hidden">
-          <p className="font-bold truncate" title={songTitle}>{songTitle}</p>
-          <p className="text-sm text-muted-foreground truncate" title={artistName}>{artistName}</p>
-        </div>
-        {trackUrl && (
-            <div className="flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors">
-                <Play className="w-5 h-5 fill-current" />
+  return (
+    <Card 
+      onClick={handleClick}
+      className={`bg-background/50 group hover:bg-accent/50 hover:shadow-md transition-all duration-300 ${isSpotifyConnected && trackUrl ? 'cursor-pointer' : 'cursor-default'}`}
+    >
+      <CardContent className="p-3 flex items-center gap-4">
+          {imageUrl ? (
+            <Image 
+              src={imageUrl} 
+              alt={`Album art for ${songTitle}`} 
+              width={64} 
+              height={64} 
+              className="rounded-md"
+            />
+          ) : (
+            <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center">
+               <Music className="w-8 h-8 text-muted-foreground" />
             </div>
-        )}
-    </CardContent>
-  );
-
-  const cardComponent = (
-    <Card className={`bg-background/50 group hover:bg-accent/50 hover:shadow-md transition-all duration-300 ${trackUrl ? 'cursor-pointer' : ''}`}>
-      {cardInnerContent}
+          )}
+          <div className="flex-grow overflow-hidden">
+            <p className="font-bold truncate" title={songTitle}>{songTitle}</p>
+            <p className="text-sm text-muted-foreground truncate" title={artistName}>{artistName}</p>
+          </div>
+          {trackUrl && (
+              <div className="flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors">
+                  <Play className="w-5 h-5 fill-current" />
+              </div>
+          )}
+      </CardContent>
     </Card>
   );
-  
-  if (trackUrl) {
-    return (
-      <a href={trackUrl} target="_blank" rel="noopener noreferrer" className="block">
-        {cardComponent}
-      </a>
-    );
-  }
-
-  return cardComponent;
 }
