@@ -45,7 +45,7 @@ const prompt = ai.definePrompt({
     Please suggest songs exclusively in the following language: {{{language}}}. Do not include songs in any other language.
     {{/if}}
     
-    Please provide a list of 8 songs that fit this specific mood. For each song, include the title and artist. Ensure the suggestions are highly relevant to the emotion. To ensure variety, provide a different set of songs each time you are asked for the same mood.`,
+    Please provide a list of 8 songs that fit this specific mood. For each song, include the title and artist. Ensure the suggestions are highly relevant to the emotion. To ensure variety, you MUST provide a different list of songs each time you are asked for the same mood. Do not repeat songs you have suggested previously for this mood.`,
 });
 
 const suggestSongsForMoodFlow = ai.defineFlow(

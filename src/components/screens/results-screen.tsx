@@ -20,7 +20,7 @@ type Song = { title: string; artist: string };
 const languages = ['Arabic', 'Bengali', 'Dutch', 'English', 'French', 'German', 'Gujarati', 'Hindi', 'Indonesian', 'Italian', 'Japanese', 'Kannada', 'Korean', 'Malayalam', 'Mandarin', 'Marathi', 'Odia', 'Polish', 'Portuguese', 'Punjabi', 'Russian', 'Spanish', 'Tamil', 'Telugu', 'Thai', 'Turkish', 'Urdu', 'Vietnamese'];
 const platforms = ['Spotify', 'YouTube', 'YouTube Music', 'Amazon Music'];
 
-export const ResultsScreen = ({ mood, songs, onReset, onRefresh, isRefreshing, language, onLanguageChange }: { mood: string; songs: Song[]; onReset: () => void; onRefresh: () => void; isRefreshing: boolean; language: string; onLanguageChange: (language: string) => void; }) => {
+export const ResultsScreen = ({ mood, songs, onReset, onRefresh, isRefreshing, language, onLanguageChange, refreshKey }: { mood: string; songs: Song[]; onReset: () => void; onRefresh: () => void; isRefreshing: boolean; language: string; onLanguageChange: (language: string) => void; refreshKey: number; }) => {
   const [streamingPlatform, setStreamingPlatform] = useState('Spotify');
   
   return (
@@ -69,7 +69,7 @@ export const ResultsScreen = ({ mood, songs, onReset, onRefresh, isRefreshing, l
                 Array.from({ length: 8 }).map((_, index) => <SongCardSkeleton key={index} />)
               ) : (
                 songs.map((song, index) => (
-                    <SongCard key={`${song.title}-${song.artist}-${index}`} song={song} streamingPlatform={streamingPlatform} />
+                    <SongCard key={`${refreshKey}-${song.title}-${song.artist}-${index}`} song={song} streamingPlatform={streamingPlatform} />
                 ))
               )}
             </div>

@@ -116,6 +116,7 @@ export default function CamoodApp() {
       case 'results':
         return <ResultsScreen 
           key={refreshKey}
+          refreshKey={refreshKey}
           mood={mood} 
           songs={songs} 
           onReset={handleReset} 
