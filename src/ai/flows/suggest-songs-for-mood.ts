@@ -36,6 +36,7 @@ export async function suggestSongsForMood(input: SuggestSongsForMoodInput): Prom
 
 const prompt = ai.definePrompt({
     name: 'suggestSongsPrompt',
+    model: 'googleai/gemini-1.5-flash-latest',
     input: {schema: SuggestSongsForMoodInputSchema},
     output: {schema: SuggestSongsForMoodOutputSchema},
     prompt: `You are a music expert and world-class DJ. Your task is to suggest 8 songs that embody the provided mood.
