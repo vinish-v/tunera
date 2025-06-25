@@ -2,7 +2,7 @@
 "use client";
 
 import Image from 'next/image';
-import { Music, Heart } from 'lucide-react';
+import { Music, Heart, Share2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
@@ -86,6 +86,72 @@ export function SongCard({ song, streamingPlatform, initialTrack }: { song: Song
     }
   };
 
+  const handleShareClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const query = encodeURIComponent(`${songTitle} ${artistName}`);
+    let url: string | undefined;
+
+    switch (streamingPlatform) {
+        case 'Spotify':
+            url = track?.external_urls.spotify ?? `https://open.spotify.com/search/${query}`;
+            break;
+        case 'YouTube':
+            url = `https://www.youtube.com/results?search_query=${query}`;
+            break;
+        case 'YouTube Music':
+            url = `https://music.youtube.com/search?q=${query}`;
+            break;
+        case 'Amazon Music':
+            url = `https://music.amazon.com/search/${query}`;
+            break;
+    }
+
+    if (!url) {
+        toast({
+            title: "Could not generate link",
+            description: "There was an issue generating a link for this song.",
+            variant: "destructive"
+        });
+        return;
+    }
+
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: `${songTitle} by ${artistName}`,
+                text: `Check out this song I found with Camood!`,
+                url: url,
+            });
+        } catch (error) {
+            if ((error as DOMException).name !== 'AbortError') {
+                console.error('Error sharing', error);
+                toast({
+                    title: "Sharing failed",
+                    description: "There was an issue sharing this song. The link has been copied instead.",
+                    variant: "destructive"
+                });
+                await navigator.clipboard.writeText(url);
+            }
+        }
+    } else {
+        // Fallback for browsers that don't support navigator.share
+        try {
+            await navigator.clipboard.writeText(url);
+            toast({
+                title: "Link Copied!",
+                description: "Song link copied to your clipboard.",
+            });
+        } catch (err) {
+            toast({
+                title: "Failed to copy",
+                description: "Could not copy the link to your clipboard.",
+                variant: "destructive"
+            });
+        }
+    }
+};
+
   const handleClick = () => {
     const query = encodeURIComponent(`${song.title} ${song.artist}`);
     let url: string | undefined;
@@ -138,15 +204,28 @@ export function SongCard({ song, streamingPlatform, initialTrack }: { song: Song
             <p className="text-sm text-muted-foreground truncate" title={artistName}>{artistName}</p>
           </div>
           {isLoaded && track && (
-            <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full h-9 w-9 shrink-0"
-                onClick={handleFavouriteClick}
-            >
-                <Heart className={cn("h-5 w-5", isFav ? "fill-red-500 text-red-500" : "text-muted-foreground")} />
-                <span className="sr-only">Favourite</span>
-            </Button>
+            <div className="flex items-center shrink-0">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full h-9 w-9"
+                    onClick={handleShareClick}
+                    title="Share song"
+                >
+                    <Share2 className="h-5 w-5 text-muted-foreground" />
+                    <span className="sr-only">Share</span>
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full h-9 w-9"
+                    onClick={handleFavouriteClick}
+                    title="Add to Favourites"
+                >
+                    <Heart className={cn("h-5 w-5", isFav ? "fill-red-500 text-red-500" : "text-muted-foreground")} />
+                    <span className="sr-only">Favourite</span>
+                </Button>
+            </div>
           )}
       </CardContent>
     </Card>
