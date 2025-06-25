@@ -63,7 +63,7 @@ export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected, onRefr
                 Array.from({ length: 3 }).map((_, index) => <SongCardSkeleton key={index} />)
               ) : (
                 songs.map((song, index) => (
-                    <SongCard key={index} song={song} isSpotifyConnected={isSpotifyConnected} />
+                    <SongCard key={`${song.title}-${song.artist}-${index}`} song={song} isSpotifyConnected={isSpotifyConnected} />
                 ))
               )}
             </div>
