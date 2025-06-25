@@ -16,11 +16,13 @@ const ptSans = PT_Sans({
 export const metadata: Metadata = {
   title: 'Tunera',
   description: 'Find music that matches your mood.',
+  manifest: '/manifest.json',
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: "#1A191B",
 };
 
 export default function RootLayout({
