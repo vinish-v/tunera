@@ -66,7 +66,7 @@ export default function RootLayout({
                         </SidebarMenuItem>
                         <SidebarMenuItem>
                             <SidebarMenuButton tooltip="About Us" asChild>
-                                <Link href="#">
+                                <Link href="/about">
                                     <Info />
                                     <span>About Us</span>
                                 </Link>
