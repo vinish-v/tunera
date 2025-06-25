@@ -35,7 +35,6 @@ export async function predictMoodFromSelfie(input: PredictMoodFromSelfieInput): 
 
 const prompt = ai.definePrompt({
   name: 'predictMoodFromSelfiePrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: PredictMoodFromSelfieInputSchema},
   output: {schema: PredictMoodFromSelfieOutputSchema},
   prompt: `You are a mood analysis expert. Analyze the user's selfie and determine their mood.
