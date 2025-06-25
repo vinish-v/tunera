@@ -90,7 +90,7 @@ export const ResultsScreen = ({ mood, songs, onReset, onRefresh, isRefreshing, l
       <CardHeader>
         <CardTitle className="text-center font-headline text-2xl sm:text-3xl flex items-center justify-center gap-2">
             <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-primary"/>
-            Your Vibe is: {mood}
+            Your Vibe is: <span className="capitalize">{mood}</span>
         </CardTitle>
         <CardDescription className="text-center pt-2">
             Here are some tracks we think you'll like. Click a song to listen on your selected platform.
