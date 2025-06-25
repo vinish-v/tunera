@@ -20,12 +20,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const data = await spotifyApi.searchTracks(`track:${query} artist:${artist}`, { limit: 1 });
+    // Use a more flexible search query that combines title and artist.
+    const data = await spotifyApi.searchTracks(`${query} ${artist}`, { limit: 1 });
     if (data.body.tracks && data.body.tracks.items.length > 0) {
       return NextResponse.json(data.body.tracks.items[0]);
     } else {
-      // Fallback search without artist if no results
-      const fallbackData = await spotifyApi.searchTracks(`track:${query}`, { limit: 1 });
+      // Fallback to searching just the title if the combined search fails.
+      const fallbackData = await spotifyApi.searchTracks(query, { limit: 1 });
       if (fallbackData.body.tracks && fallbackData.body.tracks.items.length > 0) {
         return NextResponse.json(fallbackData.body.tracks.items[0]);
       }
