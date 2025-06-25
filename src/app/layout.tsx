@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { Toaster } from "@/components/ui/toaster"
 import './globals.css';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from '@/components/ui/sidebar';
-import { User, Info, Music, Heart, Sparkles } from 'lucide-react';
+import { User, Info, Music, Heart, Sparkles, Library } from 'lucide-react';
 import Link from 'next/link';
 import { PT_Sans } from 'next/font/google';
 
@@ -60,6 +60,14 @@ export default function RootLayout({
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                         <SidebarMenuItem>
+                            <SidebarMenuButton tooltip="My Music" asChild>
+                                <Link href="/my-music">
+                                    <Library />
+                                    <span>My Music</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
                             <SidebarMenuButton tooltip="About Us" asChild>
                                 <Link href="/about">
                                     <Info />
@@ -69,6 +77,18 @@ export default function RootLayout({
                         </SidebarMenuItem>
                     </SidebarMenu>
                 </SidebarContent>
+                <SidebarHeader className="p-2 mt-auto">
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton tooltip="Account" asChild>
+                        <Link href="/account">
+                          <User />
+                          <span>Account</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarHeader>
             </Sidebar>
             <SidebarInset>
                 <header className="flex items-center justify-start p-2 border-b md:hidden sticky top-0 bg-background/80 backdrop-blur-sm z-10">
