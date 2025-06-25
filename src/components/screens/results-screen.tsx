@@ -45,8 +45,8 @@ export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRef
             Here are some tracks we think you'll like. Click a song to listen on your selected platform.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid sm:grid-cols-2 gap-4 mb-4 px-1">
+      <CardContent className="p-4 sm:p-6 pt-0">
+        <div className="grid grid-cols-2 gap-2 mb-4">
             <div className="flex items-center gap-2">
                 <Languages className="w-5 h-5 text-muted-foreground" />
                 <Select onValueChange={onLanguageChange} defaultValue={language}>
@@ -74,7 +74,7 @@ export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRef
                 </Select>
             </div>
         </div>
-        <ScrollArea className="h-96 pr-4">
+        <ScrollArea className="h-72 sm:h-96 pr-4">
             <div className="space-y-2">
               {isRefreshing ? (
                 Array.from({ length: 8 }).map((_, index) => <SongCardSkeleton key={index} />)
