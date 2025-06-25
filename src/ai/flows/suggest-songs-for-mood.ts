@@ -38,14 +38,16 @@ const prompt = ai.definePrompt({
     name: 'suggestSongsPrompt',
     input: {schema: SuggestSongsForMoodInputSchema},
     output: {schema: SuggestSongsForMoodOutputSchema},
-    prompt: `You are a music expert and world-class DJ specializing in creating playlists that perfectly match a given emotion. Your task is to suggest a few songs that embody the provided mood.
+    prompt: `You are a music expert and world-class DJ. Your task is to suggest 8 songs that embody the provided mood.
 
-    The mood is: {{{mood}}}.
-    {{#if language}}
-    Please suggest songs exclusively in the following language: {{{language}}}. Do not include songs in any other language.
-    {{/if}}
-    
-    Please provide a list of 8 songs that fit this specific mood. For each song, include the title and artist. Ensure the suggestions are highly relevant to the emotion. To ensure variety, you MUST provide a different list of songs each time you are asked for the same mood. Do not repeat songs you have suggested previously for this mood.`,
+The mood is: {{{mood}}}.
+
+{{#if language}}
+You MUST suggest songs exclusively in the following language: {{{language}}}. It is critical that you do not include songs in any other language. All 8 songs must be in {{{language}}}.
+{{/if}}
+
+For each song, include the title and artist.
+To ensure variety, you MUST provide a different list of songs each time you are asked for the same mood. Do not repeat songs you have suggested previously for this mood.`,
 });
 
 const suggestSongsForMoodFlow = ai.defineFlow(
