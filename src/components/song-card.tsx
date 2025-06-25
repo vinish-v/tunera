@@ -275,7 +275,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
       
       {selfieDataUri && moodResult && (
         <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Share Your Vibe</DialogTitle>
               <DialogDescription>Here's a preview of your shareable mood card.</DialogDescription>
@@ -289,7 +289,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
                   song={song}
               />
             </div>
-            <DialogFooter className="flex flex-col gap-2 pt-2">
+            <DialogFooter className="flex-col gap-2 pt-2">
                 <Button onClick={handleShare} disabled={isSharing || !canShareNatively} className="w-full" title={!canShareNatively ? "Your browser doesn't support direct sharing." : "Share"}>
                     <Share2 className="mr-2 h-4 w-4" />
                     {isSharing ? 'Sharing...' : 'Share via...'}
@@ -316,5 +316,3 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
     </>
   );
 }
-
-    
