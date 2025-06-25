@@ -37,14 +37,37 @@ export const SongCardSkeleton = () => (
     </Card>
 );
 
+const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <title>WhatsApp</title>
+      <path d="M12.04 2.176a10.15 10.15 0 0 0-7.38 3.122 10.203 10.203 0 0 0-2.9 8.32 10.253 10.253 0 0 0 1.95 5.34L2 22.001l3.35-1.758a10.122 10.122 0 0 0 4.98 1.252h.01a10.15 10.15 0 0 0 7.38-3.123 10.205 10.205 0 0 0 2.901-8.32 10.25 10.25 0 0 0-1.95-5.34l-1.68-2.838-2.84-1.682zm4.18 11.278c-.24-.12-.83-.41-1.02-.46a.78.78 0 0 0-.71.46 2.09 2.09 0 0 1-1.89 1.25c-.24 0-.46-.01-.65-.02a4.41 4.41 0 0 1-2.9-1.25 5.56 5.56 0 0 1-1.95-3.37c-.12-.24-.03-.45.09-.58a.51.51 0 0 1 .36-.18c.12 0 .24-.01.35 0a.48.48 0 0 1 .42.21c.14.26.47.82.52.88.05.06.09.12.01.24-.08.12-.13.18-.24.3a.24.24 0 0 0-.06.18c.02.11.11.23.23.36.27.28.98.92 2.11 1.8.84.65 1.25.83 1.41.88.16.05.28.04.38-.03a1.4 1.4 0 0 0 .58-.79c.08-.13.04-.24-.02-.33a11.96 11.96 0 0 0-.6-1.02c-.11-.18-.23-.3-.3-.42-.06-.12.01-.24.06-.3.05-.06.11-.08.18-.08.06 0 .12 0 .18-.01.21.01.39.11.53.27.14.16.21.36.21.58-.01.76-.36 1.42-.42 1.52z"/>
+    </svg>
+);
+  
+const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <title>Facebook</title>
+      <path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.35C0 23.407.593 24 1.325 24H12.82v-9.29H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24h-1.92c-1.5 0-1.793.715-1.793 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.732 0 1.325-.593 1.325-1.325V1.325C24 .593 23.407 0 22.675 0z"/>
+    </svg>
+);
+
 export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri, moodResult }: SongCardProps) {
   const [track, setTrack] = useState<SpotifyApi.SingleTrackResponse | null>(initialTrack || null);
   const [isLoading, setIsLoading] = useState(!initialTrack);
   const { addFavourite, removeFavourite, isFavourite, isLoaded } = useFavourites();
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [canShareNatively, setCanShareNatively] = useState(false);
   const moodCardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // This check needs to be in useEffect to ensure `navigator` is available.
+    const dummyFile = new File([""], "dummy.png", { type: "image/png" });
+    if (navigator.share && navigator.canShare?.({ files: [dummyFile] })) {
+        setCanShareNatively(true);
+    }
+  }, []);
 
   const handleDownload = useCallback(async () => {
     if (!moodCardRef.current) return;
@@ -78,19 +101,12 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
 
         const file = new File([blob], `camood-vibe-${song.title}.png`, { type: 'image/png' });
 
-        if (navigator.share && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                files: [file],
-                title: 'My Camood Vibe',
-                text: 'Check out the vibe I just captured with Camood!',
-            });
-        } else {
-            toast({
-                title: "Can't share directly",
-                description: "Your browser doesn't support direct file sharing. You can download the image instead.",
-            });
-            handleDownload();
-        }
+        await navigator.share({
+            files: [file],
+            title: 'My Camood Vibe',
+            text: 'Check out the vibe I just captured with Camood!',
+        });
+
     } catch (error) {
         if ((error as DOMException).name !== 'AbortError') {
             console.error('Sharing failed', error);
@@ -104,7 +120,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         setIsSharing(false);
         setIsShareOpen(false);
     }
-  }, [song.title, toast, handleDownload]);
+  }, [song.title, toast]);
 
   useEffect(() => {
     if (initialTrack) {
@@ -251,7 +267,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Share Your Vibe</DialogTitle>
-              <DialogDescription>Here's a preview of your shareable mood card. Share it with your friends!</DialogDescription>
+              <DialogDescription>Here's a preview of your shareable mood card.</DialogDescription>
             </DialogHeader>
             <div className="py-4">
               <MoodCardShare
@@ -262,15 +278,27 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
                   song={song}
               />
             </div>
-            <DialogFooter className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <Button onClick={handleDownload} disabled={isSharing} className="w-full" variant="outline">
-                    <Download className="mr-2 h-4 w-4" />
-                    {isSharing ? 'Generating...' : 'Download'}
-                </Button>
-                <Button onClick={handleShare} disabled={isSharing} className="w-full">
-                    <Share2 className="mr-2 h-4 w-4" />
-                    {isSharing ? 'Sharing...' : 'Share'}
-                </Button>
+            <DialogFooter className="flex flex-col gap-2 pt-2">
+                {canShareNatively ? (
+                    <Button onClick={handleShare} disabled={isSharing} className="w-full">
+                        <Share2 className="mr-2 h-4 w-4" />
+                        {isSharing ? 'Sharing...' : 'Share via...'}
+                    </Button>
+                ) : (
+                    <>
+                        <div className="text-center text-sm text-muted-foreground">
+                            <p>Download the image to share it on other apps.</p>
+                            <div className="flex justify-center items-center gap-2 mt-2">
+                                <WhatsAppIcon className="w-5 h-5 fill-muted-foreground" />
+                                <FacebookIcon className="w-5 h-5 fill-muted-foreground" />
+                            </div>
+                        </div>
+                        <Button onClick={handleDownload} disabled={isSharing} className="w-full mt-2" variant="outline">
+                            <Download className="mr-2 h-4 w-4" />
+                            {isSharing ? 'Generating...' : 'Download Image'}
+                        </Button>
+                    </>
+                )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
