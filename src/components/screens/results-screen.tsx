@@ -29,7 +29,7 @@ const SpotifyIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 type Song = { title: string; artist: string };
 
-const languages = ['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Dutch', 'Japanese', 'Korean', 'Mandarin', 'Hindi'];
+const languages = ['Arabic', 'Bengali', 'Dutch', 'English', 'French', 'German', 'Gujarati', 'Hindi', 'Indonesian', 'Italian', 'Japanese', 'Kannada', 'Korean', 'Malayalam', 'Mandarin', 'Marathi', 'Odia', 'Polish', 'Portuguese', 'Punjabi', 'Russian', 'Spanish', 'Tamil', 'Telugu', 'Thai', 'Turkish', 'Urdu', 'Vietnamese'];
 
 export const ResultsScreen = ({ mood, songs, onReset, isSpotifyConnected, onRefresh, isRefreshing, language, onLanguageChange }: { mood: string; songs: Song[]; onReset: () => void; isSpotifyConnected: boolean; onRefresh: () => void; isRefreshing: boolean; language: string; onLanguageChange: (language: string) => void; }) => {
   return (
