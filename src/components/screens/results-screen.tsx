@@ -30,7 +30,7 @@ type ResultsScreenProps = {
 
 
 const platforms = ['YouTube', 'Spotify', 'YouTube Music', 'Amazon Music'];
-const languages = ['English', 'Hindi', 'Tamil', 'Telugu', 'Punjabi', 'Malayalam', 'Kannada', 'Bengali', 'Marathi', 'Gujarati'];
+const languages = ['English', 'Spanish', 'French', 'German', 'Portuguese', 'Italian', 'Dutch', 'Russian', 'Mandarin', 'Japanese', 'Korean', 'Arabic', 'Hindi', 'Tamil', 'Telugu', 'Punjabi', 'Bengali', 'Marathi', 'Gujarati', 'Kannada', 'Malayalam'];
 
 export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRefresh, isRefreshing, refreshKey, language, onLanguageChange }: ResultsScreenProps) => {
   const [streamingPlatform, setStreamingPlatform] = useState('YouTube');
