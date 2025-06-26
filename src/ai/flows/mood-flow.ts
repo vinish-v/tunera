@@ -12,9 +12,12 @@ export async function getVibeFromImage(input: VibeRequest): Promise<VibeResponse
     return moodFlow(input);
 }
 
+// The model can be configured via the GEMINI_MODEL_NAME environment variable.
+const model = `googleai/${process.env.GEMINI_MODEL_NAME || 'gemini-1.5-flash-latest'}`;
+
 const moodPrompt = ai.definePrompt({
     name: 'moodPrompt',
-    model: 'googleai/gemini-1.5-flash-latest',
+    model: model,
     input: { schema: VibeRequestSchema },
     output: { schema: VibeResponseSchema },
     prompt: `You are an expert at analyzing human emotions from a photograph, with a keen eye for subtle facial expressions. You are also a world-class DJ who curates perfect playlists.
