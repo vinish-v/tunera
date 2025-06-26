@@ -18,22 +18,34 @@ const moodPrompt = ai.definePrompt({
     model: 'googleai/gemini-1.5-flash-latest',
     input: { schema: VibeRequestSchema },
     output: { schema: VibeResponseSchema },
-    prompt: `You are an expert at analyzing human emotions from a photograph.
+    prompt: `You are an expert at analyzing human emotions from a photograph, with a keen eye for subtle facial expressions.
 
-    Based on the user's selfie, determine their primary mood. The mood should be a single word (e.g., happy, sad, energetic, calm, thoughtful).
+Your task is to analyze the user's selfie and determine their primary mood. Pay close attention to their eyes, mouth, and overall facial posture.
 
-    Also, provide a single emoji that best represents this mood.
+1.  **Determine the primary mood.** The mood must be a single, descriptive word. Here are some examples of valid moods:
+    *   Happy
+    *   Sad
+    *   Energetic
+    *   Calm
+    *   Thoughtful
+    *   Excited
+    *   Content
+    *   Melancholy
+    *   Playful
+    *   Serious
 
-    Finally, suggest a playlist of exactly 8 songs that perfectly match this mood. For each song, provide only the title and the primary artist. Do not include any other information.
-    
-    {{#if previousSongs}}
-    IMPORTANT: Do not suggest any of the following songs, as they have already been recommended to the user. Generate a completely new list of songs.
-    {{#each previousSongs}}
-    - "{{title}}" by {{artist}}
-    {{/each}}
-    {{/if}}
+2.  **Select a single emoji** that best represents this mood.
 
-    Analyze this photo: {{media url=photoDataUri}}`,
+3.  **Suggest a playlist of exactly 8 songs** that perfectly match this mood. For each song, provide only the title and the primary artist. Do not include any other information.
+
+{{#if previousSongs}}
+IMPORTANT: Do not suggest any of the following songs, as they have already been recommended to the user. Generate a completely new list of songs.
+{{#each previousSongs}}
+- "{{title}}" by {{artist}}
+{{/each}}
+{{/if}}
+
+Analyze this photo: {{media url=photoDataUri}}`,
 });
 
 const moodFlow = ai.defineFlow(
