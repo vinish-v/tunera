@@ -1,7 +1,9 @@
+
 'use server';
 
 import { searchTrack } from "@/lib/spotify";
-import { getVibeFromImage as getVibeFromImageFlow, VibeRequest } from "@/ai/flows/mood-flow";
+import { getVibeFromImage as getVibeFromImageFlow } from "@/ai/flows/mood-flow";
+import type { VibeRequest } from "@/ai/schemas";
 
 export async function getTrackInfo(song: { title: string; artist: string }) {
     const query = `${song.title} ${song.artist}`;
