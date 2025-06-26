@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from 'next/image';
@@ -13,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { MoodCardShare } from "./mood-card-share";
 import { toBlob } from 'html-to-image';
 import { useToast } from "@/hooks/use-toast";
+import { getTrackInfo } from '@/app/actions';
 
 type Song = { title: string; artist: string };
 type MoodResult = { mood: string; emoji: string };
@@ -22,6 +22,12 @@ type SongCardProps = {
   streamingPlatform: string;
   selfieDataUri?: string;
   moodResult?: MoodResult;
+}
+
+type TrackInfo = {
+    name: string;
+    artist: string;
+    albumImageUrl: string | null;
 }
 
 export const SongCardSkeleton = () => (
@@ -38,6 +44,8 @@ export const SongCardSkeleton = () => (
 
 export function SongCard({ song, streamingPlatform, selfieDataUri, moodResult }: SongCardProps) {
   const { addFavourite, removeFavourite, isFavourite, isLoaded } = useFavourites();
+  const [track, setTrack] = useState<TrackInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareState, setShareState] = useState<'idle' | 'sharing' | 'downloading'>('idle');
   const moodCardRef = useRef<HTMLDivElement>(null);
@@ -47,6 +55,22 @@ export function SongCard({ song, streamingPlatform, selfieDataUri, moodResult }:
   const songId = `${song.title}-${song.artist}`;
   const isFav = isLoaded && isFavourite(songId);
 
+  useEffect(() => {
+    const fetchTrack = async () => {
+      setIsLoading(true);
+      try {
+        const trackInfo = await getTrackInfo(song);
+        setTrack(trackInfo);
+      } catch (error) {
+        console.error('Failed to fetch track info:', error);
+        setTrack({ ...song, albumImageUrl: null });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchTrack();
+  }, [song]);
+  
   useEffect(() => {
     if (isShareOpen) {
       const checkSharing = async () => {
@@ -165,6 +189,10 @@ export function SongCard({ song, streamingPlatform, selfieDataUri, moodResult }:
     }
   };
 
+  if (isLoading) {
+    return <SongCardSkeleton />;
+  }
+
   return (
     <>
       <Card 
@@ -172,8 +200,18 @@ export function SongCard({ song, streamingPlatform, selfieDataUri, moodResult }:
         className="bg-background/50 group hover:bg-accent/50 hover:shadow-md transition-all duration-300 cursor-pointer"
       >
         <CardContent className="p-3 flex items-center gap-3">
-            <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                <Music className="w-8 h-8 text-muted-foreground" />
+            <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0 relative overflow-hidden">
+                {track?.albumImageUrl ? (
+                    <Image
+                        src={track.albumImageUrl}
+                        alt={`Album art for ${song.title}`}
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                    />
+                ) : (
+                    <Music className="w-8 h-8 text-muted-foreground" />
+                )}
             </div>
             <div className="flex-grow overflow-hidden min-w-0">
               <p className="font-bold truncate" title={song.title}>{song.title}</p>
@@ -221,6 +259,7 @@ export function SongCard({ song, streamingPlatform, selfieDataUri, moodResult }:
                   mood={moodResult.mood}
                   emoji={moodResult.emoji}
                   song={{title: song.title, artist: song.artist}}
+                  imageUrl={track?.albumImageUrl ?? undefined}
               />
             </div>
             <DialogFooter className="mt-auto pt-4 flex-col sm:flex-col sm:justify-center gap-2">
