@@ -3,7 +3,8 @@
 
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { moodPlaylists, moodEmojis, Mood, Song } from '@/lib/mock-data';
+import { Song } from '@/lib/mock-data';
+import { getVibeFromImage } from '@/app/actions';
 
 import { IntroScreen } from '@/components/screens/intro-screen';
 import { CameraScreen } from '@/components/screens/camera-screen';
@@ -12,24 +13,12 @@ import { ResultsScreen } from '@/components/screens/results-screen';
 
 type Step = 'intro' | 'camera' | 'loading' | 'results';
 
-// Shuffle function to add variety to refreshed playlists
-const shuffleArray = (array: any[]) => {
-  let currentIndex = array.length, randomIndex;
-  while (currentIndex !== 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-  }
-  return array;
-}
-
 export default function TuneraApp() {
   const [step, setStep] = useState<Step>('intro');
   const [loadingMessage, setLoadingMessage] = useState('');
   const [moodResult, setMoodResult] = useState<{ mood: string; emoji: string } | null>(null);
   const [selfieDataUri, setSelfieDataUri] = useState<string | null>(null);
   const [songs, setSongs] = useState<Song[]>([]);
-  const [songHistory, setSongHistory] = useState<Song[]>([]);
   const [isSuggestingSongs, setIsSuggestingSongs] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
@@ -48,40 +37,39 @@ export default function TuneraApp() {
     setStep('loading');
     setLoadingMessage('Analyzing your vibe...');
 
-    // Simulate analysis delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    // No AI call: Pick a random mood from the mock data
-    const moods = Object.keys(moodPlaylists) as Mood[];
-    const randomMood = moods[Math.floor(Math.random() * moods.length)];
+    const result = await getVibeFromImage({ photoDataUri: imageDataUri });
     
-    setMoodResult({ mood: randomMood, emoji: moodEmojis[randomMood] });
+    if (!result) {
+        toast({
+            title: "Analysis Failed",
+            description: "Could not analyze the image. Please try again or check your API key.",
+            variant: "destructive",
+        });
+        setStep('camera');
+        return;
+    }
+
+    setMoodResult({ mood: result.mood, emoji: result.emoji });
     setLoadingMessage('Finding your perfect playlist...');
     
-    // Simulate playlist fetching delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-      
-    const suggestedSongs = moodPlaylists[randomMood];
-    
-    setSongs(suggestedSongs);
-    setSongHistory(suggestedSongs);
+    setSongs(result.songs);
     setRefreshKey(Date.now());
-
     setStep('results');
   };
 
   const handleRefreshSongs = async () => {
-    if (!moodResult?.mood) return;
+    if (!selfieDataUri) return;
 
     setIsSuggestingSongs(true);
     try {
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const currentPlaylist = moodPlaylists[moodResult.mood as Mood];
-      const shuffledSongs = shuffleArray([...currentPlaylist]);
+      const result = await getVibeFromImage({ photoDataUri: selfieDataUri });
       
-      setSongs(shuffledSongs);
+      if (!result) {
+        throw new Error("AI failed to generate new songs.");
+      }
+      
+      setMoodResult({ mood: result.mood, emoji: result.emoji });
+      setSongs(result.songs);
       setRefreshKey(Date.now());
     } catch (error) {
       console.error("Failed to refresh songs", error);
@@ -100,7 +88,6 @@ export default function TuneraApp() {
     setMoodResult(null);
     setSelfieDataUri(null);
     setSongs([]);
-    setSongHistory([]);
     setLoadingMessage('');
   };
 
