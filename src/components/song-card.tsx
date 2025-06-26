@@ -27,6 +27,7 @@ type SongCardProps = {
 type TrackInfo = {
     name: string;
     artist: string;
+    title:string;
     albumImageUrl: string | null;
 }
 
