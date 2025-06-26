@@ -1,10 +1,11 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SongCard, SongCardSkeleton } from "@/components/song-card";
-import { RefreshCw, Sparkles, Languages, Play } from 'lucide-react';
+import { RefreshCw, Sparkles, Play } from 'lucide-react';
 import { useState } from "react";
 import {
     Select,
@@ -22,16 +23,13 @@ type ResultsScreenProps = {
     onReset: () => void;
     onRefresh: () => void;
     isRefreshing: boolean;
-    language: string;
-    onLanguageChange: (language: string) => void;
     refreshKey: number;
 }
 
 
-const languages = ['Arabic', 'Bengali', 'Dutch', 'English', 'French', 'German', 'Gujarati', 'Hindi', 'Indonesian', 'Italian', 'Japanese', 'Kannada', 'Korean', 'Malayalam', 'Mandarin', 'Marathi', 'Odia', 'Polish', 'Portuguese', 'Punjabi', 'Russian', 'Spanish', 'Tamil', 'Telugu', 'Thai', 'Turkish', 'Urdu', 'Vietnamese'];
 const platforms = ['YouTube', 'Spotify', 'YouTube Music', 'Amazon Music'];
 
-export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRefresh, isRefreshing, language, onLanguageChange, refreshKey }: ResultsScreenProps) => {
+export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRefresh, isRefreshing, refreshKey }: ResultsScreenProps) => {
   const [streamingPlatform, setStreamingPlatform] = useState('YouTube');
   
   return (
@@ -46,20 +44,7 @@ export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRef
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4 sm:p-6 pt-0">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <div className="flex items-center gap-2">
-                <Languages className="w-5 h-5 text-muted-foreground" />
-                <Select onValueChange={onLanguageChange} defaultValue={language}>
-                    <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {languages.map(lang => (
-                            <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
+        <div className="mb-4">
             <div className="flex items-center gap-2">
                 <Play className="w-5 h-5 text-muted-foreground" />
                 <Select onValueChange={setStreamingPlatform} defaultValue={streamingPlatform}>

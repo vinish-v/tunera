@@ -3,8 +3,7 @@
 
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { predictMoodFromSelfie } from '@/ai/flows/predict-mood-from-selfie';
-import { suggestSongsForMood } from '@/ai/flows/suggest-songs-for-mood';
+import { moodPlaylists, moodEmojis, Mood, Song } from '@/lib/mock-data';
 
 import { IntroScreen } from '@/components/screens/intro-screen';
 import { CameraScreen } from '@/components/screens/camera-screen';
@@ -12,7 +11,17 @@ import { LoadingScreen } from '@/components/screens/loading-screen';
 import { ResultsScreen } from '@/components/screens/results-screen';
 
 type Step = 'intro' | 'camera' | 'loading' | 'results';
-type Song = { title: string; artist: string };
+
+// Shuffle function to add variety to refreshed playlists
+const shuffleArray = (array: any[]) => {
+  let currentIndex = array.length, randomIndex;
+  while (currentIndex !== 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+  }
+  return array;
+}
 
 export default function TuneraApp() {
   const [step, setStep] = useState<Step>('intro');
@@ -23,7 +32,6 @@ export default function TuneraApp() {
   const [songHistory, setSongHistory] = useState<Song[]>([]);
   const [isSuggestingSongs, setIsSuggestingSongs] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [language, setLanguage] = useState('English');
   const { toast } = useToast();
 
   const handleCapture = async (imageDataUri: string) => {
@@ -38,63 +46,42 @@ export default function TuneraApp() {
     }
     setSelfieDataUri(imageDataUri);
     setStep('loading');
-    try {
-      setLoadingMessage('Analyzing your vibe...');
-      const { mood: predictedMood, emoji: predictedEmoji } = await predictMoodFromSelfie({ photoDataUri: imageDataUri });
-      
-      if (!predictedMood || !predictedEmoji) {
-        throw new Error("Mood or emoji prediction returned empty.");
-      }
+    setLoadingMessage('Analyzing your vibe...');
 
-      setMoodResult({ mood: predictedMood, emoji: predictedEmoji });
+    // Simulate analysis delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-      setLoadingMessage('Finding your perfect playlist...');
-      const { songs: suggestedSongs } = await suggestSongsForMood({ mood: predictedMood, language, history: [] });
+    // No AI call: Pick a random mood from the mock data
+    const moods = Object.keys(moodPlaylists) as Mood[];
+    const randomMood = moods[Math.floor(Math.random() * moods.length)];
+    
+    setMoodResult({ mood: randomMood, emoji: moodEmojis[randomMood] });
+    setLoadingMessage('Finding your perfect playlist...');
+    
+    // Simulate playlist fetching delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (!suggestedSongs || suggestedSongs.length === 0) {
-        throw new Error("Song suggestion returned empty.");
-      }
-      
-      setSongs(suggestedSongs);
-      setSongHistory(suggestedSongs);
-      setRefreshKey(Date.now());
+    const suggestedSongs = moodPlaylists[randomMood];
+    
+    setSongs(suggestedSongs);
+    setSongHistory(suggestedSongs);
+    setRefreshKey(Date.now());
 
-      setStep('results');
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: "Something went wrong",
-        description: "We couldn't generate your playlist. Please try again.",
-        variant: "destructive",
-      });
-      handleReset();
-    }
+    setStep('results');
   };
 
-  const handleRefreshSongs = async (newLanguage?: string) => {
+  const handleRefreshSongs = async () => {
     if (!moodResult?.mood) return;
 
     setIsSuggestingSongs(true);
     try {
-      const langToUse = newLanguage || language;
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const currentPlaylist = moodPlaylists[moodResult.mood as Mood];
+      const shuffledSongs = shuffleArray([...currentPlaylist]);
       
-      let historyToSend = [...songHistory];
-      if (historyToSend.length >= 100) {
-        historyToSend = []; // Reset history after 100 songs
-        toast({
-            title: "Playlist Refreshed",
-            description: "You've explored over 100 songs! Starting a fresh set of recommendations.",
-        });
-      }
-
-      const { songs: suggestedSongs } = await suggestSongsForMood({ mood: moodResult.mood, language: langToUse, history: historyToSend });
-
-      if (!suggestedSongs || suggestedSongs.length === 0) {
-        throw new Error("Song suggestion returned empty.");
-      }
-
-      setSongs(suggestedSongs);
-      setSongHistory(currentHistory => [...historyToSend, ...suggestedSongs]);
+      setSongs(shuffledSongs);
       setRefreshKey(Date.now());
     } catch (error) {
       console.error("Failed to refresh songs", error);
@@ -108,11 +95,6 @@ export default function TuneraApp() {
     }
   };
 
-  const handleLanguageChange = (newLanguage: string) => {
-    setLanguage(newLanguage);
-    handleRefreshSongs(newLanguage);
-  }
-
   const handleReset = () => {
     setStep('intro');
     setMoodResult(null);
@@ -120,7 +102,6 @@ export default function TuneraApp() {
     setSongs([]);
     setSongHistory([]);
     setLoadingMessage('');
-    setLanguage('English');
   };
 
   const renderStep = () => {
@@ -139,10 +120,8 @@ export default function TuneraApp() {
           selfieDataUri={selfieDataUri!}
           songs={songs} 
           onReset={handleReset} 
-          onRefresh={() => handleRefreshSongs()}
+          onRefresh={handleRefreshSongs}
           isRefreshing={isSuggestingSongs}
-          language={language}
-          onLanguageChange={handleLanguageChange}
         />;
       default:
         return <IntroScreen onStart={() => setStep('camera')} />;
