@@ -9,6 +9,7 @@ export const VibeRequestSchema = z.object({
         title: z.string(),
         artist: z.string(),
     })).optional().describe('A list of songs that have already been suggested and should be excluded from the new playlist.'),
+    language: z.string().describe('The language for the song suggestions. The songs should be strictly in this language.'),
 });
 export type VibeRequest = z.infer<typeof VibeRequestSchema>;
 

@@ -22,6 +22,7 @@ export default function TuneraApp() {
   const [songHistory, setSongHistory] = useState<Song[]>([]);
   const [isSuggestingSongs, setIsSuggestingSongs] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [language, setLanguage] = useState('English');
   const { toast } = useToast();
 
   const handleCapture = async (imageDataUri: string) => {
@@ -38,7 +39,7 @@ export default function TuneraApp() {
     setStep('loading');
     setLoadingMessage('Analyzing your vibe...');
 
-    const result = await getVibeFromImage({ photoDataUri: imageDataUri });
+    const result = await getVibeFromImage({ photoDataUri: imageDataUri, language });
     
     if (!result) {
         toast({
@@ -64,7 +65,7 @@ export default function TuneraApp() {
 
     setIsSuggestingSongs(true);
     try {
-      const result = await getVibeFromImage({ photoDataUri: selfieDataUri, previousSongs: songHistory });
+      const result = await getVibeFromImage({ photoDataUri: selfieDataUri, previousSongs: songHistory, language });
       
       if (!result) {
         throw new Error("AI failed to generate new songs.");
@@ -100,6 +101,7 @@ export default function TuneraApp() {
     setSongs([]);
     setSongHistory([]);
     setLoadingMessage('');
+    setLanguage('English');
   };
 
   const renderStep = () => {
@@ -120,6 +122,8 @@ export default function TuneraApp() {
           onReset={handleReset} 
           onRefresh={handleRefreshSongs}
           isRefreshing={isSuggestingSongs}
+          language={language}
+          onLanguageChange={setLanguage}
         />;
       default:
         return <IntroScreen onStart={() => setStep('camera')} />;

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SongCard, SongCardSkeleton } from "@/components/song-card";
-import { RefreshCw, Sparkles, Play } from 'lucide-react';
+import { RefreshCw, Sparkles, Play, Languages } from 'lucide-react';
 import { useState } from "react";
 import {
     Select,
@@ -24,12 +24,15 @@ type ResultsScreenProps = {
     onRefresh: () => void;
     isRefreshing: boolean;
     refreshKey: number;
+    language: string;
+    onLanguageChange: (language: string) => void;
 }
 
 
 const platforms = ['YouTube', 'Spotify', 'YouTube Music', 'Amazon Music'];
+const languages = ['English', 'Hindi', 'Tamil', 'Telugu', 'Punjabi', 'Malayalam', 'Kannada', 'Bengali', 'Marathi', 'Gujarati'];
 
-export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRefresh, isRefreshing, refreshKey }: ResultsScreenProps) => {
+export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRefresh, isRefreshing, refreshKey, language, onLanguageChange }: ResultsScreenProps) => {
   const [streamingPlatform, setStreamingPlatform] = useState('YouTube');
   
   return (
@@ -44,7 +47,7 @@ export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRef
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4 sm:p-6 pt-0">
-        <div className="mb-4">
+        <div className="mb-4 space-y-2">
             <div className="flex items-center gap-2">
                 <Play className="w-5 h-5 text-muted-foreground" />
                 <Select onValueChange={setStreamingPlatform} defaultValue={streamingPlatform}>
@@ -58,8 +61,21 @@ export const ResultsScreen = ({ moodResult, selfieDataUri, songs, onReset, onRef
                     </SelectContent>
                 </Select>
             </div>
+            <div className="flex items-center gap-2">
+                <Languages className="w-5 h-5 text-muted-foreground" />
+                <Select onValueChange={onLanguageChange} defaultValue={language}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {languages.map(lang => (
+                            <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
-        <ScrollArea className="h-72 sm:h-96 pr-4">
+        <ScrollArea className="h-64 sm:h-80 pr-4">
             <div className="space-y-2">
               {isRefreshing ? (
                 Array.from({ length: 8 }).map((_, index) => <SongCardSkeleton key={index} />)
