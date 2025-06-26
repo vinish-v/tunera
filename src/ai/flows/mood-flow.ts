@@ -26,6 +26,13 @@ const moodPrompt = ai.definePrompt({
 
     Finally, suggest a playlist of exactly 8 songs that perfectly match this mood. For each song, provide only the title and the primary artist. Do not include any other information.
     
+    {{#if previousSongs}}
+    IMPORTANT: Do not suggest any of the following songs, as they have already been recommended to the user. Generate a completely new list of songs.
+    {{#each previousSongs}}
+    - "{{title}}" by {{artist}}
+    {{/each}}
+    {{/if}}
+
     Analyze this photo: {{media url=photoDataUri}}`,
 });
 

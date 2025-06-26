@@ -19,6 +19,7 @@ export default function TuneraApp() {
   const [moodResult, setMoodResult] = useState<{ mood: string; emoji: string } | null>(null);
   const [selfieDataUri, setSelfieDataUri] = useState<string | null>(null);
   const [songs, setSongs] = useState<Song[]>([]);
+  const [songHistory, setSongHistory] = useState<Song[]>([]);
   const [isSuggestingSongs, setIsSuggestingSongs] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const { toast } = useToast();
@@ -53,6 +54,7 @@ export default function TuneraApp() {
     setLoadingMessage('Finding your perfect playlist...');
     
     setSongs(result.songs);
+    setSongHistory(result.songs);
     setRefreshKey(Date.now());
     setStep('results');
   };
@@ -62,7 +64,7 @@ export default function TuneraApp() {
 
     setIsSuggestingSongs(true);
     try {
-      const result = await getVibeFromImage({ photoDataUri: selfieDataUri });
+      const result = await getVibeFromImage({ photoDataUri: selfieDataUri, previousSongs: songHistory });
       
       if (!result) {
         throw new Error("AI failed to generate new songs.");
@@ -70,6 +72,14 @@ export default function TuneraApp() {
       
       setMoodResult({ mood: result.mood, emoji: result.emoji });
       setSongs(result.songs);
+      setSongHistory(prevHistory => {
+        const newHistory = [...prevHistory, ...result.songs];
+        // Keep only the most recent 100 songs to avoid a huge prompt
+        if (newHistory.length > 100) {
+            return newHistory.slice(newHistory.length - 100);
+        }
+        return newHistory;
+      });
       setRefreshKey(Date.now());
     } catch (error) {
       console.error("Failed to refresh songs", error);
@@ -88,6 +98,7 @@ export default function TuneraApp() {
     setMoodResult(null);
     setSelfieDataUri(null);
     setSongs([]);
+    setSongHistory([]);
     setLoadingMessage('');
   };
 
