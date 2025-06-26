@@ -15,6 +15,7 @@ export async function getVibeFromImage(input: VibeRequest): Promise<VibeResponse
 
 const moodPrompt = ai.definePrompt({
     name: 'moodPrompt',
+    model: 'googleai/gemini-1.5-flash-latest',
     input: { schema: VibeRequestSchema },
     output: { schema: VibeResponseSchema },
     prompt: `You are an expert at analyzing human emotions from a photograph.
@@ -41,7 +42,7 @@ const moodFlow = ai.defineFlow(
             throw new Error("The AI failed to generate a response.");
         }
         
-        // Ensure we always return exactly 8 songs
+        // Ensure we always return at most 8 songs
         if (output.songs.length > 8) {
             output.songs = output.songs.slice(0, 8);
         }
