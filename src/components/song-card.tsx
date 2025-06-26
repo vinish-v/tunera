@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -19,7 +20,6 @@ type MoodResult = { mood: string; emoji: string };
 type SongCardProps = {
   song: Song;
   streamingPlatform: string;
-  initialTrack?: SpotifyApi.SingleTrackResponse | null;
   selfieDataUri?: string;
   moodResult?: MoodResult;
 }
@@ -36,19 +36,16 @@ export const SongCardSkeleton = () => (
     </Card>
 );
 
-export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri, moodResult }: SongCardProps) {
-  const [track, setTrack] = useState<SpotifyApi.SingleTrackResponse | null>(initialTrack || null);
-  const [isLoading, setIsLoading] = useState(!initialTrack);
+export function SongCard({ song, streamingPlatform, selfieDataUri, moodResult }: SongCardProps) {
   const { addFavourite, removeFavourite, isFavourite, isLoaded } = useFavourites();
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareState, setShareState] = useState<'idle' | 'sharing' | 'downloading'>('idle');
   const moodCardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [canShare, setCanShare] = useState(false);
-
-  const songTitle = track?.name ?? song.title;
-  const artistName = track?.artists.map(a => a.name).join(', ') ?? song.artist;
-  const imageUrl = track?.album.images[0]?.url;
+  
+  const songId = `${song.title}-${song.artist}`;
+  const isFav = isLoaded && isFavourite(songId);
 
   useEffect(() => {
     if (isShareOpen) {
@@ -74,7 +71,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         if (!blob) throw new Error("Could not create image blob.");
 
         const link = document.createElement('a');
-        link.download = `tunera-vibe-${songTitle}.png`;
+        link.download = `tunera-vibe-${song.title}.png`;
         link.href = URL.createObjectURL(blob);
         link.click();
         URL.revokeObjectURL(link.href);
@@ -89,7 +86,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
     } finally {
         setShareState('idle');
     }
-  }, [songTitle, toast]);
+  }, [song.title, toast]);
   
   const handleShare = useCallback(async () => {
     if (!moodCardRef.current || !canShare) return;
@@ -101,7 +98,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
             throw new Error('Failed to create image blob.');
         }
 
-        const file = new File([blob], `tunera-vibe-${songTitle}.png`, { type: 'image/png' });
+        const file = new File([blob], `tunera-vibe-${song.title}.png`, { type: 'image/png' });
 
         await navigator.share({
             files: [file],
@@ -120,7 +117,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
     } finally {
         setShareState('idle');
     }
-  }, [songTitle, toast, moodResult?.mood, canShare]);
+  }, [song.title, toast, moodResult?.mood, canShare]);
 
   const handleClick = useCallback(() => {
     if (canShare) {
@@ -130,54 +127,12 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
     }
   }, [canShare, handleShare, handleDownload]);
 
-
-  useEffect(() => {
-    if (initialTrack) {
-        setTrack(initialTrack);
-        setIsLoading(false);
-        return;
-    }
-
-    const fetchTrack = async () => {
-      setIsLoading(true);
-      try {
-        const searchQuery = new URLSearchParams({
-            query: song.title,
-            artist: song.artist
-        });
-        const response = await fetch(`/api/spotify/search?${searchQuery.toString()}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data && !data.error) {
-            setTrack(data);
-          } else {
-            console.error('Failed to fetch track from spotify:', data.error);
-            setTrack(null);
-          }
-        } else {
-          console.error('Failed to fetch track from spotify, status:', response.status);
-          setTrack(null);
-        }
-      } catch (error) {
-        console.error('Error fetching track:', error);
-        setTrack(null);
-      }
-      setIsLoading(false);
-    };
-
-    fetchTrack();
-  }, [song, initialTrack]);
-
-  const isFav = track ? isFavourite(track.id) : false;
-
   const handleFavouriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!track) return;
-
     if (isFav) {
-        removeFavourite(track.id);
+        removeFavourite(songId);
     } else {
-        addFavourite(track);
+        addFavourite(song);
     }
   };
 
@@ -192,7 +147,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
 
     switch (streamingPlatform) {
         case 'Spotify':
-            url = track?.external_urls.spotify ?? `https://open.spotify.com/search/${query}`;
+            url = `https://open.spotify.com/search/${query}`;
             break;
         case 'YouTube':
             url = `https://www.youtube.com/results?search_query=${query}`;
@@ -210,11 +165,6 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
     }
   };
 
-  if (isLoading && !initialTrack) {
-    // This previously returned a skeleton, causing a "double loading" effect.
-    // The component is now robust enough to render its layout with placeholders.
-  }
-
   return (
     <>
       <Card 
@@ -222,22 +172,12 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
         className="bg-background/50 group hover:bg-accent/50 hover:shadow-md transition-all duration-300 cursor-pointer"
       >
         <CardContent className="p-3 flex items-center gap-3">
-            {imageUrl ? (
-              <Image 
-                src={imageUrl} 
-                alt={`Album art for ${songTitle}`} 
-                width={64} 
-                height={64} 
-                className="rounded-md object-cover"
-              />
-            ) : (
-              <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                  <Music className="w-8 h-8 text-muted-foreground" />
-              </div>
-            )}
+            <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
+                <Music className="w-8 h-8 text-muted-foreground" />
+            </div>
             <div className="flex-grow overflow-hidden min-w-0">
-              <p className="font-bold truncate" title={songTitle}>{songTitle}</p>
-              <p className="text-sm text-muted-foreground truncate" title={artistName}>{artistName}</p>
+              <p className="font-bold truncate" title={song.title}>{song.title}</p>
+              <p className="text-sm text-muted-foreground truncate" title={song.artist}>{song.artist}</p>
             </div>
             <div className="flex items-center shrink-0">
                 <Button
@@ -245,8 +185,8 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
                     size="icon"
                     className="rounded-full h-9 w-9"
                     onClick={handleFavouriteClick}
-                    title={track ? (isFav ? 'Remove from Favourites' : 'Add to Favourites') : "Cannot favourite track (Spotify API unavailable)"}
-                    disabled={!track || !isLoaded}
+                    title={isFav ? 'Remove from Favourites' : 'Add to Favourites'}
+                    disabled={!isLoaded}
                 >
                     <Heart className={cn("h-5 w-5", isFav ? "fill-red-500 text-red-500" : "text-muted-foreground")} />
                     <span className="sr-only">Favourite</span>
@@ -280,8 +220,7 @@ export function SongCard({ song, streamingPlatform, initialTrack, selfieDataUri,
                   selfieDataUri={selfieDataUri}
                   mood={moodResult.mood}
                   emoji={moodResult.emoji}
-                  song={{title: songTitle, artist: artistName}}
-                  imageUrl={imageUrl}
+                  song={{title: song.title, artist: song.artist}}
               />
             </div>
             <DialogFooter className="mt-auto pt-4 flex-col sm:flex-col sm:justify-center gap-2">

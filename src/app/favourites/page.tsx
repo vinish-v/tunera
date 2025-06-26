@@ -3,10 +3,11 @@
 
 import { useState, useEffect } from 'react';
 import { useFavourites } from '@/hooks/use-favourites';
-import { SongCard, SongCardSkeleton } from '@/components/song-card';
+import { SongCard } from '@/components/song-card';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Play, Heart } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Skeleton } from '@/components/ui/skeleton';
 
 const platforms = ['YouTube', 'Spotify', 'YouTube Music', 'Amazon Music'];
 
@@ -19,12 +20,13 @@ export default function FavouritesPage() {
         setHasMounted(true);
     }, []);
 
-
     const renderContent = () => {
         if (!hasMounted || !isLoaded) {
             return (
                 <div className="space-y-2">
-                    {Array.from({ length: 3 }).map((_, index) => <SongCardSkeleton key={index} />)}
+                    {Array.from({ length: 3 }).map((_, index) => (
+                        <Card key={index}><CardContent className="p-3"><Skeleton className="h-16 w-full" /></CardContent></Card>
+                    ))}
                 </div>
             );
         }
@@ -41,12 +43,11 @@ export default function FavouritesPage() {
 
         return (
             <div className="space-y-2">
-                {favourites.map((track) => (
+                {favourites.map((fav) => (
                     <SongCard
-                        key={track.id}
-                        song={{ title: track.name, artist: track.artists.map(a => a.name).join(', ') }}
+                        key={fav.id}
+                        song={{ title: fav.title, artist: fav.artist }}
                         streamingPlatform={streamingPlatform}
-                        initialTrack={track}
                     />
                 ))}
             </div>
